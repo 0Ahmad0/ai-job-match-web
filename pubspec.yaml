@@ -1,0 +1,53 @@
+name: ai_job_matcher
+description: AI Job Matcher - تطبيق ذكي لمطابقة الوظائف باستخدام الذكاء الاصطناعي
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # --- State Management & Routing (الأساس) ---
+  get: ^4.6.6
+
+  # --- Local Storage (لحفظ الثيم واللغة) ---
+  get_storage:
+
+  # --- UI Responsiveness (تناسب الشاشات) ---
+  flutter_screenutil:
+
+  # --- Theming & Fonts (الخطوط والألوان) ---
+  google_fonts:
+
+  # --- Animations (أنميشن خفيف) ---
+  animate_do:
+
+
+  # --- Localization Support (دعم اتجاه النص العربي) ---
+  # هذه ضرورية مع GetX لضمان عمل الـ RTL بشكل صحيح للنصوص والأرقام
+  flutter_localizations:
+    sdk: flutter
+  intl:
+  smooth_page_indicator: ^2.0.1
+  font_awesome_flutter: ^10.12.0
+  curved_navigation_bar: ^1.0.6
+  pdf: ^3.11.3
+  path_provider: ^2.1.5
+  open_file: ^3.5.11
+  file_picker: ^10.3.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/icons/
+
