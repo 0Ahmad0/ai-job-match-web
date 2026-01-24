@@ -87,9 +87,12 @@ Clone the repository
 ```Bash
 
 git clone https://github.com/your-username/ai-job-matcher.git
-cd ai-job-matcher
-Install dependencies
 ```
+```bash
+cd ai-job-matcher
+```
+Install dependencies
+
 ```Bash
 
 flutter pub get
