@@ -6,7 +6,7 @@ import '../../../data/models/cv_model.dart';
 class CvBuilderController extends GetxController {
   final currentStep = 0.obs;
 
-  final totalSteps = 5;
+  final totalSteps = 7;
 
   final cvData = CvModel();
   final selectedTemplate = 1.obs;
