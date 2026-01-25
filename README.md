@@ -113,10 +113,7 @@ Commit your Changes (git commit -m 'Add some AmazingFeature')
 Push to the Branch (git push origin feature/AmazingFeature)
 Open a Pull Request
 
-## 👥 Authors & Contact
-
-This project was a collaborative effort. Feel free to reach out to us for any inquiries or collaborations!
-
+## 👥 Contact Me
 ### 🧑‍💻 Ahmad Alhariri
 **Team Leader / Mobile-Dev**
 
@@ -127,13 +124,6 @@ This project was a collaborative effort. Feel free to reach out to us for any in
 [![Instagram](https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white)](https://www.instagram.com/dev.ahm)
 [![Facebook](https://img.shields.io/badge/Facebook-1877F2?style=for-the-badge&logo=facebook&logoColor=white)](https://www.facebook.com/profile.php?id=100030402487387)
 [![X](https://img.shields.io/badge/X-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/AhmadAl45892861)
-
-
-### 🧑‍💻 Ahmad Mriwed
-**Mobile-Dev**
-
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/ahmadmriwed/)
-[![Gmail](https://img.shields.io/badge/Gmail-EA4335?style=for-the-badge&logo=gmail&logoColor=white)](mailto:mr.ahmadmriwed@gmail.com)
 
 
 ### 🔗 Project-Link
