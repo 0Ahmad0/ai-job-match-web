@@ -87,9 +87,12 @@ Clone the repository
 ```Bash
 
 git clone https://github.com/your-username/ai-job-matcher.git
-cd ai-job-matcher
-Install dependencies
 ```
+```bash
+cd ai-job-matcher
+```
+Install dependencies
+
 ```Bash
 
 flutter pub get
@@ -110,13 +113,21 @@ Commit your Changes (git commit -m 'Add some AmazingFeature')
 Push to the Branch (git push origin feature/AmazingFeature)
 Open a Pull Request
 
-### 📄 License
-Distributed under the MIT License. See LICENSE for more information.
+## 👥 Contact Me
+### 🧑‍💻 Ahmad Alhariri
+**Team Leader / Mobile-Dev**
 
-### 📞 Contact
-AHMAD-ALHARIRI
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Ahmad_Hariri-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/ahmadhariri/)
-[![Email](https://img.shields.io/badge/Gmail-mr.ahmed.alhariri%40gmail.com-EA4335?style=for-the-badge&logo=gmail&logoColor=white)](mailto:mr.ahmed.alhariri@gmail.com)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/ahmadhariri/)
+[![Gmail](https://img.shields.io/badge/Gmail-EA4335?style=for-the-badge&logo=gmail&logoColor=white)](mailto:mr.ahmed.alhariri@gmail.com)
+[![Telegram](https://img.shields.io/badge/Telegram-26A6E1?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/Ahmad_Alhariri)
+[![WhatsApp](https://img.shields.io/badge/WhatsApp-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://wa.me/+963954872922)
+[![Instagram](https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white)](https://www.instagram.com/dev.ahm)
+[![Facebook](https://img.shields.io/badge/Facebook-1877F2?style=for-the-badge&logo=facebook&logoColor=white)](https://www.facebook.com/profile.php?id=100030402487387)
+[![X](https://img.shields.io/badge/X-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/AhmadAl45892861)
+
+
 ### 🔗 Project-Link
 [![GitHub Repo](https://img.shields.io/badge/GitHub_Repo-ai--job--matcher-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/your-username/ai-job-matcher)
 
+### 📄 License
+Distributed under the MIT License. See LICENSE for more information.
