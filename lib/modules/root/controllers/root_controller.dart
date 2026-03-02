@@ -90,7 +90,11 @@ class RootController extends GetxController {
 
       navItems = [
         _buildIcon(FontAwesomeIcons.gaugeHigh, 'Dashboard'),
-        _buildIcon(FontAwesomeIcons.triangleExclamation, 'Reports'),
+
+        _buildIcon(FontAwesomeIcons.usersGear, 'Users'),
+
+        _buildIcon(FontAwesomeIcons.listCheck, 'Jobs'),
+
         _buildIcon(FontAwesomeIcons.userShield, 'Admin Profile'),
       ];
     }
