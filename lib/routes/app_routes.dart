@@ -18,4 +18,5 @@ abstract class Routes {
   static const EMPLOYER_EMPLOYER_DASHBOARD = '/employer/employer_dashboard';
   static const EMPLOYER_POST_JOB = '/employer/post_job';
   static const EMPLOYER_CANDIDATES = '/employer/candidates';
+  static const ADMIN_DASHBOARD = '/admin_dashboard';
 }

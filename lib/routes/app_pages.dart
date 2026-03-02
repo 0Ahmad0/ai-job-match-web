@@ -32,6 +32,10 @@ import '../modules/employer/post_job/bindings/post_job_binding.dart';
 import '../modules/employer/post_job/views/post_job_view.dart';
 import '../modules/employer/candidates/bindings/candidates_binding.dart';
 import '../modules/employer/candidates/views/candidates_view.dart';
+import '../modules/admin_dashboard/bindings/admin_dashboard_binding.dart';
+import '../modules/admin_dashboard/views/admin_dashboard_view.dart';
+
+
 
 
 
@@ -125,5 +129,11 @@ class AppPages {
       page: () => const CandidatesView(),
       binding: CandidatesBinding(),
     ),
+    GetPage(
+      name: Routes.ADMIN_DASHBOARD,
+      page: () => const AdminDashboardView(),
+      binding: AdminDashboardBinding(),
+    ),
+
 ];
 }
