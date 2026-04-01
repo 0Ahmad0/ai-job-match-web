@@ -26,7 +26,7 @@ class RootController extends GetxController {
 
   // 0: Seeker, 1: Employer, 2: Admin
   // (لاحقاً خذ هذه القيمة من StorageService بعد تسجيل الدخول)
-  final userRole = 2.obs;
+  final userRole = 0.obs;
 
   late final List<Widget> pages;
   late final List<Widget> navItems;
@@ -109,3 +109,5 @@ class RootController extends GetxController {
     return Icon(icon, size: 26, color: Colors.white);
   }
 }
+
+

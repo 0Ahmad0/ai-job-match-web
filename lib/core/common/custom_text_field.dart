@@ -13,7 +13,7 @@ class CustomTextField extends StatelessWidget {
   final bool? obscureText;
   final VoidCallback? onSuffixPressed;
   final TextInputType? keyboardType;
-  final int? maxLines;
+  final int maxLines;
 
   const CustomTextField({
     super.key,
@@ -26,7 +26,7 @@ class CustomTextField extends StatelessWidget {
     this.obscureText,
     this.onSuffixPressed,
     this.keyboardType,
-    this.maxLines,
+    this.maxLines = 1,
   });
 
   @override
