@@ -4,8 +4,9 @@ import '../controllers/admin_dashboard_controller.dart';
 class AdminDashboardBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<AdminDashboardController>(
-      () => AdminDashboardController(),
-    );
+    if (!Get.isRegistered<AdminDashboardController>()) {
+      Get.lazyPut<AdminDashboardController>(() => AdminDashboardController());
+    }
   }
 }
+

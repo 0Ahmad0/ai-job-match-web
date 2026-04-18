@@ -1,0 +1,20 @@
+{
+  "btn_add_skill": "+ إضافة مهارة",
+  "skill_hint": "مثال: Flutter, العمل الجماعي",
+  "lbl_skill": "المهارة",
+  "lbl_skill_level": "مستوى المهارة",
+  "btn_save": "حفظ",
+
+  "lbl_projects": "المشاريع",
+  "lbl_project_name": "اسم المشروع",
+  "lbl_project_desc": "الوصف",
+  "lbl_project_year": "السنة",
+  "lbl_project_url": "رابط المشروع",
+
+  "upload_desc": "PDF أو DOCX. الحد الأقصى 5 ميغابايت.",
+  "lbl_select_cv": "اختر السيرة الذاتية",
+  "lbl_apply_title": "التقديم على @job",
+  "lbl_upload_cv_msg": "ارفع سيرتك للتقديم على هذه الوظيفة.",
+  "lbl_submit_app": "إرسال الطلب",
+  "msg_app_sent": "تم إرسال الطلب بنجاح! حظاً موفقاً 🚀"
+}

@@ -6,18 +6,34 @@ import '../../data/services/storage_service.dart';
 class LocalizationController extends GetxController {
   final StorageService _storage = StorageService();
 
-  Locale? get initialLocale {
+  static const Locale english = Locale('en', 'US');
+  static const Locale arabic = Locale('ar', 'SA');
+
+  Locale get initialLocale {
     final savedLang = _storage.getLanguage();
     if (savedLang != null) {
-      return Locale(savedLang);
+      return _resolveLocale(savedLang);
     }
-    // Default system locale or fallback
-    return Get.deviceLocale;
+    return _resolveLocale(Get.deviceLocale?.languageCode ?? 'en');
   }
 
+  bool get isRtl => Get.locale?.languageCode == 'ar';
+
   void changeLanguage(String langCode) {
-    Locale locale = Locale(langCode);
+    final locale = _resolveLocale(langCode);
     Get.updateLocale(locale);
-    _storage.saveLanguage(langCode);
+    _storage.saveLanguage(locale.languageCode);
+  }
+
+  Locale _resolveLocale(String langCode) {
+    switch (langCode.toLowerCase()) {
+      case 'ar':
+      case 'ar_sa':
+        return arabic;
+      case 'en':
+      case 'en_us':
+      default:
+        return english;
+    }
   }
 }

@@ -46,7 +46,7 @@ class AboutView extends StatelessWidget {
 
               const Spacer(),
 
-              Text("© 2024 AI Job Matcher. All rights reserved.", style: TextStyle(fontSize: 10.sp, color: Colors.grey)),
+              Text('app_copyright'.tr, style: TextStyle(fontSize: 10.sp, color: Colors.grey)),
               20.verticalSpace,
             ],
           ),

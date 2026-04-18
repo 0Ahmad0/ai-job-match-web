@@ -11,25 +11,30 @@ class AddEducationSheet extends GetView<CvBuilderController> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(20.r),
+      padding: EdgeInsets.fromLTRB(20.r, 20.r, 20.r, 20.r + MediaQuery.of(context).viewInsets.bottom),
       decoration: BoxDecoration(
         color: context.theme.scaffoldBackgroundColor,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text('btn_add_edu'.tr, style: context.textTheme.headlineSmall),
-          20.verticalSpace,
-          CustomTextField(label: 'lbl_school'.tr, hint: "University...", prefixIcon: Icons.school_outlined, controller: controller.schoolCtrl),
-          15.verticalSpace,
-          CustomTextField(label: 'lbl_degree'.tr, hint: "Bachelor's...", prefixIcon: Icons.history_edu, controller: controller.degreeCtrl),
-          15.verticalSpace,
-          CustomTextField(label: 'lbl_year'.tr, hint: "2023", prefixIcon: Icons.calendar_today, controller: controller.eduYearCtrl),
-          20.verticalSpace,
-          CustomButton(text: 'btn_save'.tr, onPressed: controller.addEducation),
-          20.verticalSpace,
-        ],
+      child: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('btn_add_edu'.tr, style: context.textTheme.headlineSmall),
+              20.verticalSpace,
+              CustomTextField(label: 'lbl_school'.tr, hint: "University...", prefixIcon: Icons.school_outlined, controller: controller.schoolCtrl),
+              15.verticalSpace,
+              CustomTextField(label: 'lbl_degree'.tr, hint: "Bachelor's...", prefixIcon: Icons.history_edu, controller: controller.degreeCtrl),
+              15.verticalSpace,
+              CustomTextField(label: 'lbl_year'.tr, hint: "2023", prefixIcon: Icons.calendar_today, controller: controller.eduYearCtrl),
+              20.verticalSpace,
+              CustomButton(text: 'btn_save'.tr, onPressed: controller.addEducation),
+              20.verticalSpace,
+            ],
+          ),
+        ),
       ),
     );
   }

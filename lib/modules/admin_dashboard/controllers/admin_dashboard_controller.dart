@@ -1,80 +1,151 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class AdminDashboardController extends GetxController {
-
-  // 1. Users List
   final usersList = <Map<String, dynamic>>[].obs;
-
-  // 2. Jobs Requests List (Pending Jobs)
   final jobRequests = <Map<String, dynamic>>[].obs;
+
+  final isUsersLoading = false.obs;
+  final isJobsLoading = false.obs;
+  final isActionLoading = false.obs;
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   void onInit() {
     super.onInit();
-    _loadData();
+    loadPendingData();
   }
 
-  void _loadData() {
-    // Users Data
-    usersList.assignAll([
-      {'id': '1', 'name': 'Tech Corp', 'type': 'Employer', 'status': 'Pending'},
-      {'id': '2', 'name': 'Ahmed Ali', 'type': 'Seeker', 'status': 'Active'},
-      {'id': '3', 'name': 'Scam Ltd', 'type': 'Employer', 'status': 'Blocked'},
-    ]);
-
-    // Jobs Data
-    jobRequests.assignAll([
-      {
-        'id': '101',
-        'title': 'Senior Flutter Dev',
-        'company': 'Tech Corp',
-        'desc': 'We need 5 years exp...',
-        'salary': '5000\$',
-        'status': 'Pending'
-      },
-      {
-        'id': '102',
-        'title': 'Data Entry (Easy Money)',
-        'company': 'Unknown',
-        'desc': 'Work from home earn 1000\$ daily...',
-        'salary': '10000\$',
-        'status': 'Pending'
-      },
+  Future<void> loadPendingData() async {
+    await Future.wait([
+      fetchPendingCompanies(),
+      fetchPendingJobs(),
     ]);
   }
 
-  // --- User Actions ---
-  void toggleUserStatus(String id, String currentStatus) {
-    final index = usersList.indexWhere((u) => u['id'] == id);
-    if (index == -1) return;
+  Future<void> fetchPendingCompanies() async {
+    isUsersLoading.value = true;
+    try {
+      final snap = await _firestore
+          .collection('users')
+          .where('role', isEqualTo: 'company')
+          .where('status', isEqualTo: 'pending')
+          .get();
 
-    if (currentStatus == 'Blocked') {
-      usersList[index]['status'] = 'Active'; // Unblock
-      Get.snackbar('Success', 'User Unblocked');
-    } else {
-      usersList[index]['status'] = 'Blocked'; // Block
-      Get.snackbar('Blocked', 'User Blocked');
+      usersList.assignAll(
+        snap.docs.map((doc) {
+          final data = doc.data();
+          return <String, dynamic>{
+            'id': doc.id,
+            'name': (data['companyName'] as String?) ?? 'unknown_company'.tr,
+            'type': 'Employer',
+            'status': 'Pending',
+          };
+        }).toList(),
+      );
+    } catch (e) {
+      Get.snackbar(
+        'err_title'.tr,
+        'err_fetch_pending_companies'.trParams({'error': e.toString()}),
+      );
+    } finally {
+      isUsersLoading.value = false;
     }
-    usersList.refresh();
   }
 
-  void approveCompany(String id) {
-    final index = usersList.indexWhere((u) => u['id'] == id);
-    if (index != -1) {
-      usersList[index]['status'] = 'Active';
-      usersList.refresh();
-      Get.snackbar('Success', 'Company Approved');
+  Future<void> fetchPendingJobs() async {
+    isJobsLoading.value = true;
+    try {
+      final snap = await _firestore
+          .collection('jobs')
+          .where('status', isEqualTo: 'pending')
+          .get();
+
+      jobRequests.assignAll(
+        snap.docs.map((doc) {
+          final data = doc.data();
+          final salaryMin = data['salary_min'] ?? 0;
+          final salaryMax = data['salary_max'] ?? 0;
+          return <String, dynamic>{
+            'id': doc.id,
+            'title': (data['title'] as String?) ?? '',
+            'company': (data['company_name'] as String?) ?? 'unknown_company'.tr,
+            'desc': (data['description'] as String?) ?? '',
+            'salary': '$salaryMin - $salaryMax',
+            'status': 'Pending',
+          };
+        }).toList(),
+      );
+    } catch (e) {
+      Get.snackbar(
+        'err_title'.tr,
+        'err_fetch_pending_jobs'.trParams({'error': e.toString()}),
+      );
+    } finally {
+      isJobsLoading.value = false;
     }
   }
 
-  // --- Job Actions ---
-  void approveJob(String id) {
-    jobRequests.removeWhere((j) => j['id'] == id);
-    Get.snackbar('Approved', 'Job is now live!');
+  Future<void> approveCompany(String id) async {
+    isActionLoading.value = true;
+    try {
+      await _firestore.collection('users').doc(id).update({
+        'status': 'approved',
+        'updated_at': FieldValue.serverTimestamp(),
+      });
+      usersList.removeWhere((u) => u['id'] == id);
+      Get.snackbar('success_title'.tr, 'label_company_approved'.tr);
+    } catch (e) {
+      Get.snackbar(
+        'err_title'.tr,
+        'err_company_approve_failed'.trParams({'error': e.toString()}),
+      );
+    } finally {
+      isActionLoading.value = false;
+    }
   }
 
-  void rejectJob(String id) {
+  Future<void> rejectCompany(String id) async {
+    isActionLoading.value = true;
+    try {
+      await _firestore.collection('users').doc(id).update({
+        'status': 'rejected',
+        'updated_at': FieldValue.serverTimestamp(),
+      });
+      usersList.removeWhere((u) => u['id'] == id);
+      Get.snackbar('success_title'.tr, 'msg_company_rejected'.tr);
+    } catch (e) {
+      Get.snackbar(
+        'err_title'.tr,
+        'err_company_reject_failed'.trParams({'error': e.toString()}),
+      );
+    } finally {
+      isActionLoading.value = false;
+    }
+  }
+
+  Future<void> approveJob(String id) async {
+    isActionLoading.value = true;
+    try {
+      await _firestore.collection('jobs').doc(id).update({
+        'status': 'approved',
+        'updated_at': FieldValue.serverTimestamp(),
+      });
+      jobRequests.removeWhere((j) => j['id'] == id);
+      Get.snackbar('success_title'.tr, 'label_job_approved'.tr);
+    } catch (e) {
+      Get.snackbar(
+        'err_title'.tr,
+        'err_job_approve_failed'.trParams({'error': e.toString()}),
+      );
+    } finally {
+      isActionLoading.value = false;
+    }
+  }
+
+  Future<void> rejectJob(String id) async {
     final reasonCtrl = TextEditingController();
     Get.defaultDialog(
       title: 'btn_reject_reason'.tr,
@@ -86,14 +157,34 @@ class AdminDashboardController extends GetxController {
           ),
         ],
       ),
-      textConfirm: 'Reject',
+      textConfirm: 'dialog_reject_confirm'.tr,
       confirmTextColor: Colors.white,
       buttonColor: Colors.red,
-      onConfirm: () {
-        if (reasonCtrl.text.isNotEmpty) {
+      onConfirm: () async {
+        if (reasonCtrl.text.isEmpty) {
+          return;
+        }
+        isActionLoading.value = true;
+        try {
+          await _firestore.collection('jobs').doc(id).update({
+            'status': 'rejected',
+            'rejection_reason': reasonCtrl.text.trim(),
+            'updated_at': FieldValue.serverTimestamp(),
+          });
           jobRequests.removeWhere((j) => j['id'] == id);
           Get.back();
-          Get.snackbar('Rejected', 'Job rejected: ${reasonCtrl.text}');
+          Get.snackbar(
+            'success_title'.tr,
+            'msg_job_rejected_reason'.trParams({'reason': reasonCtrl.text}),
+          );
+        } catch (e) {
+          Get.back();
+          Get.snackbar(
+            'err_title'.tr,
+            'err_job_reject_failed'.trParams({'error': e.toString()}),
+          );
+        } finally {
+          isActionLoading.value = false;
         }
       },
     );

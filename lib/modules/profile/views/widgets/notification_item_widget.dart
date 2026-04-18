@@ -99,7 +99,7 @@ class NotificationItemWidget extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        notification.time,
+                        notification.timestamp.toString(),
                         style: TextStyle(fontSize: 10.sp, color: Colors.grey),
                       ),
                     ],

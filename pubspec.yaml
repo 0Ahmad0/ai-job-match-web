@@ -24,7 +24,14 @@ dependencies:
 
   # --- Animations (أنميشن خفيف) ---
   animate_do:
+  flutter_animate: ^4.5.2
+  shimmer: ^3.0.0
 
+  # --- AI Integration (Gemini API) ---
+  google_generative_ai: ^0.4.6
+
+  # --- Environment Variables (API key security) ---
+  flutter_dotenv: ^5.2.1
 
   # --- Localization Support (دعم اتجاه النص العربي) ---
   # هذه ضرورية مع GetX لضمان عمل الـ RTL بشكل صحيح للنصوص والأرقام
@@ -35,10 +42,16 @@ dependencies:
   font_awesome_flutter: ^10.12.0
   curved_navigation_bar: ^1.0.6
   pdf: ^3.11.3
+  printing: ^5.13.4
   path_provider: ^2.1.5
   open_file: ^3.5.11
   file_picker: ^10.3.8
-  firebase_core: ^4.5.0
+  firebase_core: ^4.7.0
+  firebase_auth: ^6.4.0
+  cloud_firestore: ^6.3.0
+  firebase_storage: ^13.0.0
+  firebase_messaging: ^16.2.0
+  cached_network_image: ^3.4.1
 
 dev_dependencies:
   flutter_test:
@@ -51,4 +64,5 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - .env
 

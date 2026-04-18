@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:animate_do/animate_do.dart';
 
+import '../../../core/common/app_ui.dart';
+import '../../../core/common/shimmer_skeletons.dart';
 import '../../../data/models/application_model.dart';
 import '../controllers/applications_controller.dart';
 import 'widgets/application_card_widget.dart';
@@ -12,15 +13,12 @@ class ApplicationsView extends GetView<ApplicationsController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(ApplicationsController());
-
     return Scaffold(
       appBar: AppBar(title: Text('lbl_my_applications'.tr), centerTitle: true),
       body: Column(
         children: [
-          // 1. شريط الفلتر المطور
           Container(
-            padding: EdgeInsets.symmetric(vertical: 15.h),
+            padding: EdgeInsets.symmetric(vertical: 14.h),
             decoration: BoxDecoration(
               color: context.theme.scaffoldBackgroundColor,
               boxShadow: [
@@ -37,65 +35,52 @@ class ApplicationsView extends GetView<ApplicationsController> {
               child: Obx(
                 () => Row(
                   children: [
-                    _buildCustomChip(
-                      context,
-                      'lbl_all'.tr,
-                      null,
-                      Colors.blue,
-                      Icons.grid_view_rounded,
-                    ),
-                    12.horizontalSpace,
-                    _buildCustomChip(
-                      context,
-                      'status_pending'.tr,
-                      AppStatus.pending,
-                      Colors.orange,
-                      Icons.access_time_rounded,
-                    ),
-                    12.horizontalSpace,
-                    _buildCustomChip(
-                      context,
-                      'status_accepted'.tr,
-                      AppStatus.accepted,
-                      Colors.green,
-                      Icons.check_circle_outline_rounded,
-                    ),
-                    12.horizontalSpace,
-                    _buildCustomChip(
-                      context,
-                      'status_rejected'.tr,
-                      AppStatus.rejected,
-                      Colors.red,
-                      Icons.cancel_outlined,
-                    ),
+                    _buildChip(context, 'lbl_all'.tr, null, Colors.blue, Icons.grid_view_rounded),
+                    10.horizontalSpace,
+                    _buildChip(context, 'status_applied'.tr, AppStatus.applied, Colors.grey, Icons.send_rounded),
+                    10.horizontalSpace,
+                    _buildChip(context, 'status_under_review'.tr, AppStatus.underReview, Colors.orange, Icons.visibility_rounded),
+                    10.horizontalSpace,
+                    _buildChip(context, 'status_interview_scheduled'.tr, AppStatus.interviewScheduled, Colors.indigo, Icons.event_available_outlined),
+                    10.horizontalSpace,
+                    _buildChip(context, 'status_accepted'.tr, AppStatus.accepted, Colors.green, Icons.check_circle_outline_rounded),
+                    10.horizontalSpace,
+                    _buildChip(context, 'status_rejected'.tr, AppStatus.rejected, Colors.red, Icons.cancel_outlined),
                   ],
                 ),
               ),
             ),
           ),
-
-          // 2. القائمة
           Expanded(
             child: Obx(() {
-              final apps = controller.filteredApps;
+              if (controller.isLoading.value) {
+                return const Padding(
+                  padding: EdgeInsets.all(20),
+                  child: ApplicationListShimmer(),
+                );
+              }
 
-              if (apps.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.filter_list_off,
-                        size: 60.sp,
-                        color: Colors.grey.shade300,
-                      ),
-                      10.verticalSpace,
-                      Text(
-                        'msg_no_apps'.tr,
-                        style: TextStyle(color: Colors.grey, fontSize: 14.sp),
-                      ),
-                    ],
+              if (controller.errorMessage.value.isNotEmpty) {
+                return AppStateCard(
+                  icon: Icons.error_outline,
+                  title: 'err_title'.tr,
+                  message: controller.errorMessage.value,
+                  action: SizedBox(
+                    width: 220.w,
+                    child: ElevatedButton(
+                      onPressed: controller.loadApplications,
+                      child: Text('btn_retry'.tr),
+                    ),
                   ),
+                );
+              }
+
+              final apps = controller.filteredApps;
+              if (apps.isEmpty) {
+                return AppStateCard(
+                  icon: Icons.assignment_outlined,
+                  title: 'applications_empty_title'.tr,
+                  message: 'msg_no_apps'.tr,
                 );
               }
 
@@ -103,13 +88,7 @@ class ApplicationsView extends GetView<ApplicationsController> {
                 padding: EdgeInsets.all(20.r),
                 itemCount: apps.length,
                 itemBuilder: (context, index) {
-                  return FadeInUp(
-                    key: ValueKey(
-                      "${apps[index].id}_${controller.filterStatus.value}",
-                    ),
-                    duration: const Duration(milliseconds: 300),
-                    child: ApplicationCardWidget(application: apps[index]),
-                  );
+                  return ApplicationCardWidget(application: apps[index]);
                 },
               );
             }),
@@ -119,42 +98,27 @@ class ApplicationsView extends GetView<ApplicationsController> {
     );
   }
 
-  Widget _buildCustomChip(
-    BuildContext context,
-    String label,
-    AppStatus? status,
-    Color color,
-    IconData icon,
-  ) {
+  Widget _buildChip(BuildContext context, String label, AppStatus? status, Color color, IconData icon) {
     final isSelected = controller.filterStatus.value == status;
-
-    final bgColor = isSelected ? color.withValues(alpha: 0.15) : Colors.transparent;
-    final borderColor = isSelected ? color : Colors.grey.shade300;
-    final textColor = isSelected ? color : Colors.grey;
-    final iconColor = isSelected ? color : Colors.grey;
-
     return InkWell(
-      onTap: () => controller.setFilter(
-        status == controller.filterStatus.value ? null : status,
-      ),
-      // ضغطة ثانية تلغي الفلتر (اختياري)
+      onTap: () => controller.setFilter(status == controller.filterStatus.value ? null : status),
       borderRadius: BorderRadius.circular(30.r),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 250),
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
         decoration: BoxDecoration(
-          color: bgColor,
+          color: isSelected ? color.withValues(alpha: 0.14) : Colors.transparent,
           borderRadius: BorderRadius.circular(30.r),
-          border: Border.all(color: borderColor, width: 1.5),
+          border: Border.all(color: isSelected ? color : Colors.grey.shade300, width: 1.3),
         ),
         child: Row(
           children: [
-            Icon(icon, size: 18.sp, color: iconColor),
+            Icon(icon, size: 18.sp, color: isSelected ? color : Colors.grey),
             8.horizontalSpace,
             Text(
               label,
               style: TextStyle(
-                color: textColor,
+                color: isSelected ? color : Colors.grey,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                 fontSize: 13.sp,
               ),

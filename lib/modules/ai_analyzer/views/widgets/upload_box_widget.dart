@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:animate_do/animate_do.dart';
+import '../../../../../routes/app_routes.dart';
 import '../../controllers/ai_analyzer_controller.dart';
 
 class UploadBoxWidget extends GetView<AiAnalyzerController> {
@@ -14,7 +15,9 @@ class UploadBoxWidget extends GetView<AiAnalyzerController> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           GestureDetector(
-            onTap: controller.pickFile,
+            onTap: () {
+              controller.pickFile();
+            },
             child: Container(
               width: double.infinity,
               height: 250.h,
@@ -56,21 +59,40 @@ class UploadBoxWidget extends GetView<AiAnalyzerController> {
           ),
           40.verticalSpace,
           Obx(() {
-            if (controller.fileName.isNotEmpty) {
-              return SizedBox(
-                width: double.infinity,
-                height: 50.h,
-                child: ElevatedButton(
-                  onPressed: controller.startAnalysis,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: context.theme.primaryColor,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+            return Column(
+              children: [
+                if (controller.fileName.isNotEmpty)
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50.h,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        controller.startAnalysis();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: context.theme.primaryColor,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                      ),
+                      child: Text('btn_analyze'.tr, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    ),
                   ),
-                  child: Text('btn_analyze'.tr, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                ),
-              );
-            }
-            return const SizedBox.shrink();
+                if (controller.fileName.isEmpty) ...[
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50.h,
+                    child: OutlinedButton(
+                      onPressed: () {
+                        Get.toNamed(Routes.CV_BUILDER);
+                      },
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                      ),
+                      child: Text('card_create_title'.tr),
+                    ),
+                  ),
+                ],
+              ],
+            );
           }),
         ],
       ),

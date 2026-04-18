@@ -11,22 +11,25 @@ class RootView extends GetView<RootController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // الجسم: الصفحة المختارة حالياً
-      body: Obx(() => controller.pages[controller.currentIndex.value]),
-
-      // البار السفلي
-      bottomNavigationBar: Obx(() => CurvedNavigationBar(
-        index: controller.currentIndex.value,
-        height: 60.h,
-        items: controller.navItems,
-        color: context.theme.primaryColor,
-        buttonBackgroundColor: context.theme.primaryColor,
-        backgroundColor: Colors.transparent, // مهم جداً لشفافية الخلفية
-        animationCurve: Curves.easeInOut,
-        animationDuration: const Duration(milliseconds: 400),
-        onTap: controller.changePage,
-        letIndexChange: (index) => true,
-      )),
+      body: Obx(() {
+        controller.tabsVersion.value;
+        return controller.pages[controller.currentIndex.value];
+      }),
+      bottomNavigationBar: Obx(() {
+        controller.tabsVersion.value;
+        return CurvedNavigationBar(
+          index: controller.currentIndex.value,
+          height: 60.h,
+          items: controller.navItems,
+          color: context.theme.primaryColor,
+          buttonBackgroundColor: context.theme.primaryColor,
+          backgroundColor: Colors.transparent,
+          animationCurve: Curves.easeInOut,
+          animationDuration: const Duration(milliseconds: 400),
+          onTap: controller.changePage,
+          letIndexChange: (index) => true,
+        );
+      }),
     );
   }
 }

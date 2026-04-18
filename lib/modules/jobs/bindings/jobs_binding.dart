@@ -4,8 +4,9 @@ import '../controllers/jobs_controller.dart';
 class JobsBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<JobsController>(
-      () => JobsController(),
-    );
+    if (!Get.isRegistered<JobsController>()) {
+      Get.lazyPut<JobsController>(() => JobsController());
+    }
   }
 }
+

@@ -4,8 +4,9 @@ import '../controllers/post_job_controller.dart';
 class PostJobBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<PostJobController>(
-      () => PostJobController(),
-    );
+    if (!Get.isRegistered<PostJobController>()) {
+      Get.lazyPut<PostJobController>(() => PostJobController());
+    }
   }
 }
+

@@ -1,84 +1,97 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:animate_do/animate_do.dart';
-import '../../controllers/seeker_home_controller.dart'; // تأكد من المسار
+
+import '../../../../core/common/app_ui.dart';
+import '../../controllers/seeker_home_controller.dart';
 
 class HomeHeaderWidget extends StatelessWidget {
   const HomeHeaderWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // 1. العثور على الكنترولر للوصول للمتغيرات
-    // نستخدم find لأن الكنترولر تم حقنه بالفعل في الصفحة الأب
     final controller = Get.find<SeekerHomeController>();
 
     return FadeInDown(
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 650),
       child: Container(
-        padding: EdgeInsets.only(left: 20.w, right: 20.w, top: 20.h, bottom: 30.h),
+        width: double.infinity,
+        padding: EdgeInsets.only(left: 20.w, right: 20.w, top: 20.h, bottom: 28.h),
         decoration: BoxDecoration(
-          color: context.theme.primaryColor,
-          borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(30.r),
-            bottomRight: Radius.circular(30.r),
+          gradient: const LinearGradient(
+            colors: [Color(0xFF1456F1), Color(0xFF0E2F79)],
+            begin: AlignmentDirectional.topStart,
+            end: AlignmentDirectional.bottomEnd,
           ),
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(34.r),
+            bottomRight: Radius.circular(34.r),
+          ),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x221456F1),
+              blurRadius: 22,
+              offset: Offset(0, 10),
+            ),
+          ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center, // لضمان المحاذاة
+        child: SafeArea(
+          bottom: false,
+          child: Obx(
+            () => Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // 2. استخدام Expanded لمنع الـ Overflow
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // 3. Obx الآن تراقب متغيراً حقيقياً (userName.value)
-                      Obx(() => Text(
-                        'home_welcome'.trParams({'name': controller.userName.value}),
+                      Text(
+                        controller.isHeaderLoading.value
+                            ? '...'
+                            : 'home_welcome'.trParams({'name': controller.userName.value}),
                         style: TextStyle(
                           fontSize: 22.sp,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w800,
                           color: Colors.white,
                         ),
-                        maxLines: 1, // لمنع النص من أخذ أكثر من سطر إذا كان طويلاً
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                      )),
-
-                      5.verticalSpace,
-
+                      ),
+                      6.verticalSpace,
                       Text(
                         'home_subtitle'.tr,
                         style: TextStyle(
                           fontSize: 12.sp,
-                          color: Colors.white.withValues(alpha: 0.9),
+                          color: Colors.white.withValues(alpha: 0.84),
                         ),
                       ),
                     ],
                   ),
                 ),
-
-                15.horizontalSpace, // مسافة بين النص والصورة
-
-                // صورة البروفايل
-                Container(
-                  padding: EdgeInsets.all(2.r),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.5), width: 2),
-                  ),
-                  child: CircleAvatar(
-                    radius: 25.r,
-                    backgroundColor: Colors.white.withValues(alpha: 0.2),
-                    child: Icon(Icons.person, color: Colors.white, size: 30.sp),
-                  ),
-                )
+                16.horizontalSpace,
+                Column(
+                  children: [
+                    AppUserAvatar(
+                      name: controller.userName.value,
+                      imageUrl: controller.userImage.value,
+                      radius: 24,
+                      onTap: controller.openProfile,
+                    ),
+                    8.verticalSpace,
+                    Text(
+                      'nav_profile'.tr,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.88),
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../../../../core/common/app_ui.dart';
+import '../../../../../core/theme/app_theme.dart';
+
 class EmpStatCard extends StatelessWidget {
   final String title;
   final String count;
@@ -18,54 +21,40 @@ class EmpStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(15.r),
-      decoration: BoxDecoration(
-        color: context.theme.cardColor,
-        borderRadius: BorderRadius.circular(15.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
-      ),
+    return AppThemedCard(
+      elevation: AppElevation.small,
+      padding: EdgeInsets.all(AppTheme.spacing15.r),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Flexible(
             child: Container(
-              width: 200.w,
-              height: 200.w,
-              padding: EdgeInsets.all(8.r),
+              width: 80.w,
+              height: 80.w,
+              padding: EdgeInsets.all(AppTheme.spacing8.r),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: color, size: 20.sp),
+              child: Icon(icon, color: color, size: 36.sp),
             ),
           ),
+          AppTheme.spacing12.verticalSpace,
           Flexible(
             child: Text(
               count,
-              style: TextStyle(
-                fontSize: 40.sp,
-                fontWeight: FontWeight.bold,
-                color: context.textTheme.bodyLarge?.color,
+              style: context.textTheme.displaySmall?.copyWith(
+                color: color,
               ),
             ),
           ),
+          AppTheme.spacing8.verticalSpace,
           Flexible(
             child: Text(
               title,
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: Colors.grey,
-                fontWeight: FontWeight.w500,
-              ),
+              textAlign: TextAlign.center,
+              style: context.textTheme.bodySmall,
             ),
           ),
         ],

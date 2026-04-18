@@ -21,12 +21,12 @@ class PrivacyView extends StatelessWidget {
 
             // محتوى إضافي لملء الصفحة كشكل جمالي
             20.verticalSpace,
-            _buildSection(context, "1. Data Collection"),
-            Text("We collect information to provide better services...", style: TextStyle(color: Colors.grey, fontSize: 12.sp)),
+            _buildSection(context, 'privacy_data_collection_title'.tr),
+            Text('privacy_data_collection_desc'.tr, style: TextStyle(color: Colors.grey, fontSize: 12.sp)),
 
             20.verticalSpace,
-            _buildSection(context, "2. Security"),
-            Text("We prioritize your security with industry-standard protocols...", style: TextStyle(color: Colors.grey, fontSize: 12.sp)),
+            _buildSection(context, 'privacy_security_title'.tr),
+            Text('privacy_security_desc'.tr, style: TextStyle(color: Colors.grey, fontSize: 12.sp)),
           ],
         ),
       ),

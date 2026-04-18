@@ -3,76 +3,46 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../../data/models/application_model.dart';
-import '../track_application_view.dart';
+import '../../../../routes/app_routes.dart';
 
 class ApplicationCardWidget extends StatelessWidget {
-  final ApplicationModel application;
-
   const ApplicationCardWidget({super.key, required this.application});
+
+  final ApplicationModel application;
 
   @override
   Widget build(BuildContext context) {
-    // تحديد الألوان والنص حسب الحالة
-    Color statusColor;
-    String statusText;
-    IconData statusIcon;
-
-    switch (application.status) {
-      case AppStatus.accepted:
-        statusColor = Colors.green;
-        statusText = 'status_accepted'.tr;
-        statusIcon = Icons.check_circle_outline;
-        break;
-      case AppStatus.rejected:
-        statusColor = Colors.red;
-        statusText = 'status_rejected'.tr;
-        statusIcon = Icons.cancel_outlined;
-        break;
-      case AppStatus.pending:
-      default:
-        statusColor = Colors.orange;
-        statusText = 'status_pending'.tr;
-        statusIcon = Icons.access_time;
-        break;
-    }
+    final statusMeta = _statusMeta(application.status);
 
     return InkWell(
-      onTap: (){
-        Get.to(() => TrackApplicationView(application: application));
-      },
+      onTap: () => Get.toNamed(Routes.TRACK_APPLICATION, arguments: application),
+      borderRadius: BorderRadius.circular(22.r),
       child: Container(
-        margin: EdgeInsets.only(bottom: 15.h),
-        padding: EdgeInsets.all(16.r),
+        margin: EdgeInsets.only(bottom: 16.h),
+        padding: EdgeInsets.all(18.r),
         decoration: BoxDecoration(
           color: context.theme.cardColor,
-          borderRadius: BorderRadius.circular(16.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-          border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+          borderRadius: BorderRadius.circular(22.r),
+          border: Border.all(color: context.theme.dividerColor),
         ),
         child: Column(
           children: [
-            Row(
+            Wrap(
+              spacing: 14.w,
+              runSpacing: 12.h,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                // Company Logo Placeholder
                 Container(
-                  width: 50.w,
-                  height: 50.w,
+                  width: 52.w,
+                  height: 52.w,
                   decoration: BoxDecoration(
                     color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(12.r),
+                    borderRadius: BorderRadius.circular(16.r),
                   ),
-                  child: const Icon(Icons.business, color: Colors.grey),
+                  child: const Icon(Icons.business_center_outlined, color: Colors.grey),
                 ),
-                15.horizontalSpace,
-
-                // Job Info
-                Expanded(
+                SizedBox(
+                  width: 450.w,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -88,57 +58,69 @@ class ApplicationCardWidget extends StatelessWidget {
                     ],
                   ),
                 ),
-
-                // Status Badge
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
                   decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(20.r),
-                    border: Border.all(color: statusColor.withValues(alpha: 0.2)),
+                    color: statusMeta.color.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(999.r),
                   ),
                   child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(statusIcon, size: 14.sp, color: statusColor),
-                      5.horizontalSpace,
+                      Icon(statusMeta.icon, size: 15.sp, color: statusMeta.color),
+                      6.horizontalSpace,
                       Text(
-                        statusText,
-                        style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 10.sp),
+                        statusMeta.label,
+                        style: TextStyle(color: statusMeta.color, fontWeight: FontWeight.bold, fontSize: 11.sp),
                       ),
                     ],
                   ),
                 ),
               ],
             ),
-
-            15.verticalSpace,
-            Divider(color: Colors.grey.withValues(alpha: 0.1)),
-            10.verticalSpace,
-
-            // Date & Action
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            16.verticalSpace,
+            Divider(color: context.theme.dividerColor),
+            12.verticalSpace,
+            Wrap(
+              spacing: 14.w,
+              runSpacing: 10.h,
+              alignment: WrapAlignment.spaceBetween,
               children: [
                 Text(
                   "${'lbl_applied_on'.tr}: ${application.appliedDate}",
                   style: TextStyle(color: Colors.grey, fontSize: 11.sp),
                 ),
-
-                // Track Button (Optional visual cue)
+                if (application.matchScore != null)
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                    decoration: BoxDecoration(
+                      color: context.theme.primaryColor.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(999.r),
+                    ),
+                    child: Text(
+                      'lbl_ai_match'.trParams({'score': application.matchScore.toString()}),
+                      style: TextStyle(
+                        color: context.theme.primaryColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 11.sp,
+                      ),
+                    ),
+                  ),
                 Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       'lbl_track'.tr,
                       style: TextStyle(
-                          color: context.theme.primaryColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12.sp
+                        color: context.theme.primaryColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12.sp,
                       ),
                     ),
                     5.horizontalSpace,
                     Icon(Icons.arrow_forward, size: 14.sp, color: context.theme.primaryColor),
                   ],
-                )
+                ),
               ],
             ),
           ],
@@ -146,4 +128,27 @@ class ApplicationCardWidget extends StatelessWidget {
       ),
     );
   }
+
+  _StatusMeta _statusMeta(AppStatus status) {
+    switch (status) {
+      case AppStatus.accepted:
+        return _StatusMeta('status_accepted'.tr, Colors.green, Icons.check_circle_outline);
+      case AppStatus.interviewScheduled:
+        return _StatusMeta('status_interview'.tr, Colors.indigo, Icons.event_available_outlined);
+      case AppStatus.rejected:
+        return _StatusMeta('status_rejected'.tr, Colors.red, Icons.cancel_outlined);
+      case AppStatus.underReview:
+        return _StatusMeta('status_pending'.tr, Colors.orange, Icons.access_time);
+      case AppStatus.applied:
+        throw UnimplementedError();
+    }
+  }
+}
+
+class _StatusMeta {
+  _StatusMeta(this.label, this.color, this.icon);
+
+  final String label;
+  final Color color;
+  final IconData icon;
 }

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:animate_do/animate_do.dart';
 
+import '../../../../core/common/shimmer_skeletons.dart';
 import '../controllers/candidates_controller.dart';
 import 'widgets/candidate_card_widget.dart';
 
@@ -11,53 +12,129 @@ class CandidatesView extends GetView<CandidatesController> {
 
   @override
   Widget build(BuildContext context) {
-    Get.put(CandidatesController());
-
     return Scaffold(
       appBar: AppBar(
         title: Text('lbl_candidates_title'.tr),
         centerTitle: true,
         actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.filter_list)),
+          IconButton(
+            onPressed: controller.fetchApplicants,
+            icon: const Icon(Icons.refresh),
+          ),
         ],
       ),
       body: Column(
         children: [
-          // Header Info
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
             child: Row(
               children: [
-                Text(
-                  "Job: Flutter Developer", // يمكن جعله ديناميكياً لاحقاً
-                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+                Expanded(
+                  child: Obx(
+                    () => Text(
+                      'lbl_candidate_job_header'.trParams({
+                        'job': controller.activeJobTitle.value.isEmpty
+                            ? 'unknown_job'.tr
+                            : controller.activeJobTitle.value,
+                      }),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ),
-                const Spacer(),
-                Obx(() => Text(
-                  "${controller.candidates.length} Applicants",
-                  style: TextStyle(color: Colors.grey, fontSize: 12.sp),
-                )),
+                8.horizontalSpace,
+                Obx(
+                  () => Text(
+                    'lbl_applicants_count'.trParams({
+                      'count': controller.filteredCandidates.length.toString(),
+                    }),
+                    style: TextStyle(color: Colors.grey, fontSize: 12.sp),
+                  ),
+                ),
               ],
             ),
+          ).animate().fade(duration: 300.ms).slideY(begin: 0.06, end: 0),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 4.h),
+            child: Obx(
+              () => SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _buildFilterChip(context, 'lbl_all'.tr, 'all'),
+                    8.horizontalSpace,
+                    _buildFilterChip(context, 'status_applied'.tr, 'applied'),
+                    8.horizontalSpace,
+                    _buildFilterChip(context, 'status_under_review'.tr, 'under_review'),
+                    8.horizontalSpace,
+                    _buildFilterChip(context, 'status_accepted'.tr, 'accepted'),
+                    8.horizontalSpace,
+                    _buildFilterChip(context, 'status_interview_scheduled'.tr, 'interview_scheduled'),
+                    8.horizontalSpace,
+                    _buildFilterChip(context, 'status_rejected'.tr, 'rejected'),
+                  ],
+                ),
+              ),
+            ),
           ),
-
-          // List
           Expanded(
-            child: Obx(() => ListView.builder(
-              padding: EdgeInsets.all(20.r),
-              itemCount: controller.candidates.length,
-              itemBuilder: (context, index) {
-                // انميشن تتابعي جميل
-                return FadeInUp(
-                  delay: Duration(milliseconds: index * 100),
-                  child: CandidateCardWidget(
-                    candidate: controller.candidates[index],
+            child: Obx(() {
+              if (controller.isLoading.value) {
+                return const CandidateListShimmer();
+              }
+              final items = controller.filteredCandidates;
+              if (items.isEmpty) {
+                return Center(
+                  child: Text(
+                    'msg_no_applicants'.tr,
+                    style: TextStyle(color: Colors.grey, fontSize: 14.sp),
                   ),
                 );
-              },
-            )),
+              }
+              return ListView.builder(
+                padding: EdgeInsets.all(20.r),
+                itemCount: items.length,
+                itemBuilder: (context, index) {
+                  return CandidateCardWidget(candidate: items[index])
+                      .animate()
+                      .fade(duration: 300.ms)
+                      .slideY(begin: 0.08, end: 0, delay: (index * 40).ms);
+                },
+              );
+            }),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(BuildContext context, String title, String value) {
+    final selected = controller.selectedStatusFilter.value == value;
+    return InkWell(
+      onTap: () => controller.setStatusFilter(value),
+      borderRadius: BorderRadius.circular(999.r),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: selected ? context.theme.primaryColor.withValues(alpha: 0.12) : Colors.transparent,
+          borderRadius: BorderRadius.circular(999.r),
+          border: Border.all(
+            color: selected ? context.theme.primaryColor : Colors.grey.withValues(alpha: 0.4),
+          ),
+        ),
+        child: Text(
+          title,
+          style: TextStyle(
+            fontSize: 12.sp,
+            color: selected ? context.theme.primaryColor : Colors.grey,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
       ),
     );
   }

@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+import '../../../../core/common/app_ui.dart';
+import '../../../../core/common/shimmer_skeletons.dart';
 import '../controllers/employer_dashboard_controller.dart';
 import 'widgets/emp_stat_card.dart';
 import 'widgets/applicant_tile_widget.dart';
@@ -18,92 +20,104 @@ class EmployerDashboardView extends GetView<EmployerDashboardController> {
         title: Text('emp_dash_title'.tr),
         centerTitle: false,
         actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.notifications_outlined)),
+          IconButton(
+            onPressed: controller.loadDashboardData,
+            icon: const Icon(Icons.refresh),
+          ),
         ],
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(20.r),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 1. Stats Grid
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 4,
-              crossAxisSpacing: 15.w,
-              mainAxisSpacing: 15.h,
-              childAspectRatio: 1.25,
-              children: [
-                FadeInUp(
-                  delay: const Duration(milliseconds: 100),
-                  child: Obx(() => EmpStatCard(
-                    title: 'stat_active_jobs'.tr,
-                    count: controller.activeJobsCount.toString(),
-                    icon: FontAwesomeIcons.briefcase,
-                    color: Colors.blue,
-                  )),
+        child: Obx(
+          () => Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (controller.isLoading.value) const CardListShimmer(itemCount: 2),
+              if (!controller.isLoading.value)
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final crossAxisCount = constraints.maxWidth < 700 ? 2 : 4;
+                    return GridView.count(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisCount: crossAxisCount,
+                      crossAxisSpacing: 15.w,
+                      mainAxisSpacing: 15.h,
+                      childAspectRatio: 1.25,
+                      children: [
+                        FadeInUp(
+                          delay: const Duration(milliseconds: 100),
+                          child: EmpStatCard(
+                            title: 'stat_active_jobs'.tr,
+                            count: controller.activeJobsCount.toString(),
+                            icon: FontAwesomeIcons.briefcase,
+                            color: Colors.blue,
+                          ),
+                        ),
+                        FadeInUp(
+                          delay: const Duration(milliseconds: 200),
+                          child: EmpStatCard(
+                            title: 'stat_new_candidates'.tr,
+                            count: controller.newCandidatesCount.toString(),
+                            icon: FontAwesomeIcons.users,
+                            color: Colors.orange,
+                          ),
+                        ),
+                        FadeInUp(
+                          delay: const Duration(milliseconds: 300),
+                          child: EmpStatCard(
+                            title: 'stat_shortlisted'.tr,
+                            count: controller.shortlistedCount.toString(),
+                            icon: FontAwesomeIcons.heart,
+                            color: Colors.red,
+                          ),
+                        ),
+                        FadeInUp(
+                          delay: const Duration(milliseconds: 400),
+                          child: EmpStatCard(
+                            title: 'stat_interviews_scheduled'.tr,
+                            count: controller.interviewsCount.toString(),
+                            icon: FontAwesomeIcons.calendarCheck,
+                            color: Colors.green,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
-                FadeInUp(
-                  delay: const Duration(milliseconds: 200),
-                  child: Obx(() => EmpStatCard(
-                    title: 'stat_new_candidates'.tr,
-                    count: controller.newCandidatesCount.toString(),
-                    icon: FontAwesomeIcons.users,
-                    color: Colors.orange,
-                  )),
+              30.verticalSpace,
+              FadeInLeft(
+                delay: const Duration(milliseconds: 500),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('lbl_recent_applicants'.tr, style: context.textTheme.headlineSmall?.copyWith(fontSize: 18.sp)),
+                    Text('lbl_view_all'.tr, style: TextStyle(color: context.theme.primaryColor, fontSize: 12.sp)),
+                  ],
                 ),
-                FadeInUp(
-                  delay: const Duration(milliseconds: 300),
-                  child: Obx(() => EmpStatCard(
-                    title: 'stat_shortlisted'.tr,
-                    count: controller.shortlistedCount.toString(),
-                    icon: FontAwesomeIcons.heart,
-                    color: Colors.red,
-                  )),
-                ),
-                FadeInUp(
-                  delay: const Duration(milliseconds: 400),
-                  child: Obx(() => EmpStatCard(
-                    title: 'stat_interviews_scheduled'.tr,
-                    count: controller.interviewsCount.toString(),
-                    icon: FontAwesomeIcons.calendarCheck,
-                    color: Colors.green,
-                  )),
-                ),
-              ],
-            ),
-
-            30.verticalSpace,
-
-            // 2. Recent Applicants Title
-            FadeInLeft(
-              delay: const Duration(milliseconds: 500),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('lbl_recent_applicants'.tr, style: context.textTheme.headlineSmall?.copyWith(fontSize: 18.sp)),
-                  Text('lbl_view_all'.tr, style: TextStyle(color: context.theme.primaryColor, fontSize: 12.sp)),
-                ],
               ),
-            ),
-
-            15.verticalSpace,
-
-            // 3. Applicants List
-            Obx(() => Column(
-              children: controller.recentApplicants.map((app) {
-                return FadeInUp(
-                  child: ApplicantTileWidget(
-                    name: app['name'],
-                    job: app['job'],
-                    matchScore: app['match'],
-                    time: app['time'],
-                  ),
-                );
-              }).toList(),
-            )),
-          ],
+              15.verticalSpace,
+              if (!controller.isLoading.value && controller.recentApplicants.isEmpty)
+                AppStateCard(
+                  icon: Icons.group_outlined,
+                  title: 'lbl_recent_applicants'.tr,
+                  message: 'msg_no_applicants'.tr,
+                ),
+              if (!controller.isLoading.value)
+                Column(
+                  children: controller.recentApplicants.map((app) {
+                    return FadeInUp(
+                      child: ApplicantTileWidget(
+                        name: (app['name'] as String?) ?? '',
+                        job: (app['job'] as String?) ?? '',
+                        matchScore: (app['match'] as int?) ?? 0,
+                        time: (app['time'] as String?) ?? '-',
+                      ),
+                    );
+                  }).toList(),
+                ),
+            ],
+          ),
         ),
       ),
     );

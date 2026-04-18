@@ -4,8 +4,9 @@ import '../controllers/employer_dashboard_controller.dart';
 class EmployerDashboardBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<EmployerDashboardController>(
-      () => EmployerDashboardController(),
-    );
+    if (!Get.isRegistered<EmployerDashboardController>()) {
+      Get.lazyPut<EmployerDashboardController>(() => EmployerDashboardController());
+    }
   }
 }
+

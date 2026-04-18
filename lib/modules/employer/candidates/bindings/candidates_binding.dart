@@ -4,8 +4,9 @@ import '../controllers/candidates_controller.dart';
 class CandidatesBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<CandidatesController>(
-      () => CandidatesController(),
-    );
+    if (!Get.isRegistered<CandidatesController>()) {
+      Get.lazyPut<CandidatesController>(() => CandidatesController());
+    }
   }
 }
+

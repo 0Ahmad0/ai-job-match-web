@@ -1,58 +1,150 @@
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 
 import '../../../data/models/notification_model.dart';
 
 class NotificationsController extends GetxController {
   final notifications = <NotificationModel>[].obs;
+  final isLoading = false.obs;
+  final unreadCount = 0.obs;
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  StreamSubscription<QuerySnapshot>? _notificationsSub;
 
   @override
   void onInit() {
     super.onInit();
-    _loadDummyNotifications();
+    _startListener();
   }
 
-  void _loadDummyNotifications() {
-    notifications.assignAll([
-      NotificationModel(
-        id: '1',
-        title: 'notif_type_app'.tr,
-        body: 'Your application for "Flutter Developer" was viewed by HR.',
-        time: '2m ago',
-        type: NotificationType.application,
-        isRead: false,
-      ),
-      NotificationModel(
-        id: '2',
-        title: 'notif_type_job'.tr,
-        body: 'New job match found: Senior Backend Engineer at Google.',
-        time: '1h ago',
-        type: NotificationType.job,
-        isRead: false,
-      ),
-      NotificationModel(
-        id: '3',
-        title: 'notif_type_sys'.tr,
-        body: 'Welcome to AI Job Matcher! Complete your profile to get started.',
-        time: '1d ago',
-        type: NotificationType.system,
-        isRead: true,
-      ),
-    ]);
-  }
-
-  void markAllAsRead() {
-    for (var n in notifications) {
-      n.isRead = true;
+  void _startListener() {
+    final user = _auth.currentUser;
+    if (user == null) {
+      notifications.clear();
+      isLoading.value = false;
+      return;
     }
-    notifications.refresh();
+
+    isLoading.value = true;
+    _notificationsSub = _firestore
+        .collection('users')
+        .doc(user.uid)
+        .collection('notifications')
+        .orderBy('created_at', descending: true)
+        .snapshots()
+        .listen((snapshot) {
+      try {
+        final items = snapshot.docs.map((doc) {
+          return NotificationModel.fromFirestore(doc.id, doc.data() as Map<String, dynamic>);
+        }).toList();
+
+        notifications.assignAll(items);
+        unreadCount.value = items.where((n) => !n.isRead).length;
+      } catch (e) {
+        print('Failed to load notifications: $e');
+      } finally {
+        isLoading.value = false;
+      }
+    });
   }
 
-  void removeNotification(String id) {
-    notifications.removeWhere((n) => n.id == id);
-    // Get.snackbar('Success', 'msg_deleted'.tr, snackPosition: SnackPosition.BOTTOM, duration: Duration(seconds: 1));
+  Future<void> markAsRead(String notificationId) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    try {
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('notifications')
+          .doc(notificationId)
+          .update({'is_read': true});
+
+      final index = notifications.indexWhere((n) => n.id == notificationId);
+      if (index != -1) {
+        notifications[index].isRead = true;
+        notifications.refresh();
+        unreadCount.value = notifications.where((n) => !n.isRead).length;
+      }
+    } catch (e) {
+      print('Failed to mark notification as read: $e');
+    }
   }
 
-  void clearAll() {
-    notifications.clear();
+  Future<void> markAllAsRead() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    try {
+      final batch = _firestore.batch();
+      for (final notification in notifications.where((n) => !n.isRead)) {
+        final ref = _firestore
+            .collection('users')
+            .doc(user.uid)
+            .collection('notifications')
+            .doc(notification.id);
+        batch.update(ref, {'is_read': true});
+      }
+      await batch.commit();
+
+      for (var n in notifications) {
+        n.isRead = true;
+      }
+      notifications.refresh();
+      unreadCount.value = 0;
+    } catch (e) {
+      print('Failed to mark all notifications as read: $e');
+    }
+  }
+
+  Future<void> removeNotification(String id) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    try {
+      await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .collection('notifications')
+          .doc(id)
+          .delete();
+
+      notifications.removeWhere((n) => n.id == id);
+      unreadCount.value = notifications.where((n) => !n.isRead).length;
+    } catch (e) {
+      print('Failed to remove notification: $e');
+    }
+  }
+
+  Future<void> clearAll() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    try {
+      final batch = _firestore.batch();
+      for (final notification in notifications) {
+        final ref = _firestore
+            .collection('users')
+            .doc(user.uid)
+            .collection('notifications')
+            .doc(notification.id);
+        batch.delete(ref);
+      }
+      await batch.commit();
+      notifications.clear();
+      unreadCount.value = 0;
+    } catch (e) {
+      print('Failed to clear all notifications: $e');
+    }
+  }
+
+  @override
+  void onClose() {
+    _notificationsSub?.cancel();
+    super.onClose();
   }
 }

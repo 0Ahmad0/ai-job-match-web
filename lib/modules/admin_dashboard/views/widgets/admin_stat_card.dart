@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../../../../core/common/app_ui.dart';
+import '../../../../../core/theme/app_theme.dart';
+
 class AdminStatCard extends StatelessWidget {
   final String title;
   final String value;
@@ -18,20 +21,10 @@ class AdminStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16.r),
-      decoration: BoxDecoration(
-        color: context.isDarkMode ? const Color(0xFF1E1E2C) : Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: color.withOpacity(0.3), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+    return AppThemedCard(
+      elevation: AppElevation.small,
+      padding: EdgeInsets.all(AppTheme.spacing16.r),
+      border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -41,14 +34,14 @@ class AdminStatCard extends StatelessWidget {
               Icon(icon, color: color, size: 24.sp),
               Text(
                 value,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.sp),
+                style: context.textTheme.headlineSmall?.copyWith(color: color),
               ),
             ],
           ),
-          10.verticalSpace,
+          AppTheme.spacing10.verticalSpace,
           Text(
             title,
-            style: TextStyle(color: Colors.grey, fontSize: 12.sp),
+            style: context.textTheme.bodySmall,
           ),
         ],
       ),

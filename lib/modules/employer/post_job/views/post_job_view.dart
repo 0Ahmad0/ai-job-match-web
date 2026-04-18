@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:animate_do/animate_do.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../core/common/custom_button.dart';
+import '../../../../core/common/shimmer_skeletons.dart';
 import '../../../../core/common/custom_text_field.dart';
 import '../controllers/post_job_controller.dart';
 
@@ -13,7 +14,7 @@ class PostJobView extends GetView<PostJobController> {
   @override
   Widget build(BuildContext context) {
     // الحقن (يمكن نقله للـ Binding)
-    Get.put(PostJobController());
+    
 
     return Scaffold(
       appBar: AppBar(title: Text('lbl_post_job'.tr), centerTitle: true),
@@ -77,16 +78,18 @@ class PostJobView extends GetView<PostJobController> {
                       ),
                     ),
                   if (controller.currentStep.value > 0) 15.horizontalSpace,
-                  Expanded(
-                    child: CustomButton(
-                      text: controller.currentStep.value == 0
-                          ? 'btn_next'.tr
-                          : 'lbl_publish'.tr,
-                      onPressed: controller.nextStep,
+                    Expanded(
+                      child: controller.isPublishing.value
+                          ? const ShimmerSkeleton(height: 50, radius: 12)
+                          : CustomButton(
+                              text: controller.currentStep.value == 0
+                                  ? 'btn_next'.tr
+                                  : 'lbl_publish'.tr,
+                              onPressed: controller.nextStep,
+                            ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+              ).animate().fade(duration: 280.ms).slideY(begin: 0.04, end: 0),
             ),
           ],
         ),
@@ -122,7 +125,7 @@ class PostJobView extends GetView<PostJobController> {
               children: controller.jobTypes.map((type) {
                 final isSelected = controller.selectedJobType.value == type;
                 return ChoiceChip(
-                  label: Text(type),
+                  label: Text(type == 'Full Time' ? 'lbl_full_time'.tr : type == 'Part Time' ? 'lbl_part_time'.tr : type == 'Remote' ? 'lbl_remote'.tr : type == 'Contract' ? 'lbl_contract'.tr : type),
                   selected: isSelected,
                   onSelected: (val) => controller.selectedJobType.value = type,
                   selectedColor: context.theme.primaryColor,
@@ -137,7 +140,7 @@ class PostJobView extends GetView<PostJobController> {
           20.verticalSpace,
           CustomTextField(
             label: 'lbl_location_input'.tr,
-            hint: 'New York, Remote...',
+            hint: 'hint_location_input'.tr,
             prefixIcon: Icons.location_on_outlined,
             controller: controller.locationCtrl,
           ),
@@ -155,7 +158,7 @@ class PostJobView extends GetView<PostJobController> {
               Expanded(
                 child: CustomTextField(
                   label: '',
-                  hint: 'Min (e.g. 2000)',
+                  hint: 'hint_min_salary'.tr,
                   prefixIcon: Icons.attach_money,
                   controller: controller.minSalaryCtrl,
                   keyboardType: TextInputType.number,
@@ -165,7 +168,7 @@ class PostJobView extends GetView<PostJobController> {
               Expanded(
                 child: CustomTextField(
                   label: '',
-                  hint: 'Max (e.g. 5000)',
+                  hint: 'hint_max_salary'.tr,
                   prefixIcon: Icons.attach_money,
                   controller: controller.maxSalaryCtrl,
                   keyboardType: TextInputType.number,
@@ -257,3 +260,4 @@ class PostJobView extends GetView<PostJobController> {
     );
   }
 }
+

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../../../core/common/app_ui.dart';
+import '../../../../core/theme/app_theme.dart';
+
 class ProfileMenuTile extends StatelessWidget {
   final String title;
   final IconData icon;
@@ -20,30 +23,33 @@ class ProfileMenuTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
+    final iconColor = isDestructive ? AppTheme.errorColor : context.theme.primaryColor;
+
+    return AppThemedListTile(
       onTap: onTap,
-      contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 5.h),
       leading: Container(
-        padding: EdgeInsets.all(8.r),
+        padding: EdgeInsets.all(AppTheme.spacing8.r),
         decoration: BoxDecoration(
-          color: isDestructive ? Colors.red.withValues(alpha: 0.1) : context.theme.primaryColor.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(8.r),
+          color: iconColor.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(AppTheme.radiusSmall.r),
         ),
         child: Icon(
           icon,
           size: 20.sp,
-          color: isDestructive ? Colors.red : context.theme.primaryColor,
+          color: iconColor,
         ),
       ),
       title: Text(
         title,
-        style: TextStyle(
-          fontSize: 14.sp,
-          fontWeight: FontWeight.w600,
-          color: isDestructive ? Colors.red : context.textTheme.bodyLarge?.color,
+        style: context.textTheme.bodyLarge?.copyWith(
+          color: isDestructive ? AppTheme.errorColor : null,
         ),
       ),
-      trailing: trailing ?? Icon(Icons.arrow_forward_ios, size: 16.sp, color: Colors.grey),
+      trailing: trailing ?? Icon(
+        Icons.arrow_forward_ios,
+        size: 16.sp,
+        color: context.theme.dividerColor,
+      ),
     );
   }
 }

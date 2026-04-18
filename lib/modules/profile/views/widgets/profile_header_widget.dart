@@ -1,7 +1,10 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:animate_do/animate_do.dart';
+
+import '../../../../core/common/app_ui.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../controllers/profile_controller.dart';
 
 class ProfileHeaderWidget extends GetView<ProfileController> {
@@ -10,43 +13,64 @@ class ProfileHeaderWidget extends GetView<ProfileController> {
   @override
   Widget build(BuildContext context) {
     return FadeInDown(
-      child: Column(
-        children: [
-          // Avatar with Ring
-          Container(
-            padding: EdgeInsets.all(4.r),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: context.theme.primaryColor, width: 2),
-            ),
-            child: CircleAvatar(
-              radius: 50.r,
-              backgroundColor: Colors.grey.shade200,
-              backgroundImage: controller.userImage.value.isNotEmpty
-                  ? NetworkImage(controller.userImage.value)
-                  : null,
-              child: controller.userImage.value.isEmpty
-                  ? Icon(Icons.person, size: 50.sp, color: Colors.grey)
-                  : null,
-            ),
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(AppTheme.spacing24.r),
+        decoration: BoxDecoration(
+          gradient: AppTheme.primaryGradient,
+          borderRadius: BorderRadius.circular(AppTheme.radiusXXL.r),
+          boxShadow: AppTheme.shadowLarge,
+        ),
+        child: Obx(
+          () => Wrap(
+            spacing: AppTheme.spacing18.w,
+            runSpacing: AppTheme.spacing18.h,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              AppUserAvatar(
+                name: controller.userName.value,
+                imageUrl: controller.userImage.value,
+                radius: 38,
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      controller.userName.value,
+                      style: context.textTheme.headlineSmall?.copyWith(
+                        color: Colors.white,
+                      ),
+                    ),
+                    AppTheme.spacing6.verticalSpace,
+                    Text(
+                      controller.userJob.value,
+                      style: context.textTheme.bodyLarge?.copyWith(
+                        color: Colors.white.withValues(alpha: 0.92),
+                      ),
+                    ),
+                    AppTheme.spacing6.verticalSpace,
+                    Text(
+                      controller.userEmail.value,
+                      style: context.textTheme.bodyMedium?.copyWith(
+                        color: Colors.white.withValues(alpha: 0.78),
+                      ),
+                    ),
+                    if (controller.userBio.value.isNotEmpty) ...[
+                      AppTheme.spacing12.verticalSpace,
+                      Text(
+                        controller.userBio.value,
+                        style: context.textTheme.bodyMedium?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.88),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
           ),
-
-          15.verticalSpace,
-
-          // Name
-          Text(
-            controller.userName.value,
-            style: context.textTheme.headlineMedium?.copyWith(fontSize: 22.sp),
-          ),
-
-          5.verticalSpace,
-
-          // Job Title
-          Text(
-            controller.userJob.value,
-            style: context.textTheme.bodyMedium?.copyWith(color: Colors.grey),
-          ),
-        ],
+        ),
       ),
     );
   }

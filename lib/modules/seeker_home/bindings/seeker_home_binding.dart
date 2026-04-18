@@ -4,8 +4,8 @@ import '../controllers/seeker_home_controller.dart';
 class SeekerHomeBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<SeekerHomeController>(
-      () => SeekerHomeController(),
-    );
+    if (!Get.isRegistered<SeekerHomeController>()) {
+      Get.lazyPut<SeekerHomeController>(() => SeekerHomeController());
+    }
   }
 }

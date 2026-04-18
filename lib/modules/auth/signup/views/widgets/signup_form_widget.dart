@@ -25,7 +25,9 @@ class SignupFormWidget extends GetView<SignupController> {
               hint: 'name_hint'.tr,
               prefixIcon: Icons.person_outline,
               controller: controller.nameController,
-              validator: (value) => (value?.isEmpty ?? true) ? 'Required' : null,
+              validator: (value) => (value?.isEmpty ?? true)
+                  ? 'err_required_field'.tr
+                  : null,
             ),
 
             16.verticalSpace,
@@ -60,7 +62,7 @@ class SignupFormWidget extends GetView<SignupController> {
             Obx(() => CustomTextField(
               label: 'confirm_pass'.tr,
               hint: 'confirm_pass_hint'.tr,
-              prefixIcon: Icons.lock, // أيقونة مختلفة قليلاً
+              prefixIcon: Icons.lock,
               controller: controller.confirmPassController,
               isPassword: true,
               obscureText: controller.isConfirmHidden.value,
@@ -70,6 +72,18 @@ class SignupFormWidget extends GetView<SignupController> {
                 return null;
               },
             )),
+
+            16.verticalSpace,
+
+            // About You (Optional)
+            CustomTextField(
+              label: 'lbl_about_you'.tr,
+              hint: 'hint_about_you'.tr,
+              prefixIcon: Icons.person_outline_rounded,
+              controller: controller.aboutYouController,
+              maxLines: 3,
+              validator: (value) => null, // Optional field
+            ),
 
             30.verticalSpace,
 

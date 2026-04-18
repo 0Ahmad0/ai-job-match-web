@@ -4,8 +4,9 @@ import '../controllers/applications_controller.dart';
 class ApplicationsBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<ApplicationsController>(
-      () => ApplicationsController(),
-    );
+    if (!Get.isRegistered<ApplicationsController>()) {
+      Get.lazyPut<ApplicationsController>(() => ApplicationsController());
+    }
   }
 }
+

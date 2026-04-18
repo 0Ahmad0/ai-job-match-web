@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:animate_do/animate_do.dart';
 
+import '../../../../core/common/app_ui.dart';
 import '../../../../core/common/custom_button.dart';
 import '../../controllers/cv_builder_controller.dart';
 import 'add_experience_sheet.dart';
@@ -13,28 +14,38 @@ class StepExperienceWidget extends GetView<CvBuilderController> {
   @override
   Widget build(BuildContext context) {
     return FadeInRight(
-      child: Padding(
-        padding: EdgeInsets.all(20.r),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('step_experience'.tr, style: context.textTheme.headlineMedium),
-            20.verticalSpace,
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.all(20.r),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('step_experience'.tr, style: context.textTheme.headlineMedium),
+              20.verticalSpace,
+              if (controller.isSectionHighlighted('experience')) ...[
+                AppStateCard(
+                  icon: Icons.work_history_outlined,
+                  title: 'cv_fix_focus_title'.tr,
+                  message: 'experience_hint'.tr, // or use a dedicated key if exists, fallback to a sensible one
+                ),
+                14.verticalSpace,
+              ],
 
-            // القائمة
-            Obx(() {
-              if (controller.experiences.isEmpty) {
-                return Expanded(
-                  child: Center(
-                    child: Text(
-                      'no_exp_added'.tr,
-                      style: TextStyle(color: Colors.grey, fontSize: 14.sp),
+              Obx(() {
+                if (controller.experiences.isEmpty) {
+                  return Padding(
+                    padding: EdgeInsets.symmetric(vertical: 40.h),
+                    child: Center(
+                      child: Text(
+                        'no_exp_added'.tr,
+                        style: TextStyle(color: Colors.grey, fontSize: 14.sp),
+                      ),
                     ),
-                  ),
-                );
-              }
-              return Expanded(
-                child: ListView.builder(
+                  );
+                }
+                return ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
                   itemCount: controller.experiences.length,
                   itemBuilder: (ctx, i) {
                     final exp = controller.experiences[i];
@@ -56,22 +67,22 @@ class StepExperienceWidget extends GetView<CvBuilderController> {
                       ),
                     );
                   },
-                ),
-              );
-            }),
+                );
+              }),
 
-            10.verticalSpace,
+              20.verticalSpace,
 
-            // زر الإضافة
-            CustomButton(
-              text: 'btn_add_position'.tr,
-              color: context.isDarkMode ? Colors.grey.shade800 : Colors.grey.shade200,
-              textColor: context.isDarkMode ? Colors.white : Colors.black,
-              onPressed: () {
-                Get.bottomSheet(const AddExperienceSheet());
-              },
-            ),
-          ],
+              // زر الإضافة
+              CustomButton(
+                text: 'btn_add_position'.tr,
+                color: context.isDarkMode ? Colors.grey.shade800 : Colors.grey.shade200,
+                textColor: context.isDarkMode ? Colors.white : Colors.black,
+                onPressed: () {
+                  Get.bottomSheet(const AddExperienceSheet(), isScrollControlled: true);
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -12,7 +12,7 @@ class NotificationsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // حقن الكنترولر هنا لأنه خاص بهذه الصفحة فقط
-    final controller = Get.put(NotificationsController());
+    final controller = Get.find<NotificationsController>();
 
     return Scaffold(
       appBar: AppBar(

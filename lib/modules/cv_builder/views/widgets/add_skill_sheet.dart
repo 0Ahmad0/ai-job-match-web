@@ -1,86 +1,74 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+
 import '../../../../core/common/custom_button.dart';
 import '../../../../core/common/custom_text_field.dart';
 import '../../controllers/cv_builder_controller.dart';
-import '../../../../data/models/cv_model.dart';
 
-class AddSkillSheet extends StatefulWidget {
+class AddSkillSheet extends StatelessWidget {
   const AddSkillSheet({super.key});
 
   @override
-  State<AddSkillSheet> createState() => _AddSkillSheetState();
-}
-
-class _AddSkillSheetState extends State<AddSkillSheet> {
-  final controller = Get.find<CvBuilderController>();
-  int selectedLevel = 1;
-
-  @override
   Widget build(BuildContext context) {
+    final controller = Get.find<CvBuilderController>();
     return Container(
-      padding: EdgeInsets.all(20.r),
+      padding: EdgeInsets.fromLTRB(20.r, 20.r, 20.r, 20.r + MediaQuery.of(context).viewInsets.bottom),
       decoration: BoxDecoration(
         color: context.theme.scaffoldBackgroundColor,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text('Add Skill', style: context.textTheme.headlineSmall),
-          20.verticalSpace,
-          CustomTextField(
-            label: 'lbl_skill'.tr,
-            hint: "e.g. Flutter",
-            prefixIcon: Icons.star_outline,
-            controller: controller.skillCtrl,
-          ),
-          20.verticalSpace,
-          // اختيار مستوى المهارة
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text('btn_add_skill'.tr, style: context.textTheme.headlineSmall),
+              20.verticalSpace,
+              CustomTextField(
+                label: 'lbl_skill'.tr,
+                hint: 'skill_hint'.tr,
+                prefixIcon: Icons.star_outline,
+                controller: controller.skillCtrl,
+              ),
+              20.verticalSpace,
               Text('lbl_skill_level'.tr, style: context.textTheme.bodyMedium),
+              8.verticalSpace,
               Obx(
-                () => DropdownButton<int>(
-                  value: selectedLevel,
+                () => DropdownButtonFormField<int>(
+                  isExpanded: true,
+                  value: controller.selectedSkillLevel.value,
                   items: [1, 2, 3, 4, 5]
                       .map(
-                        (level) => DropdownMenuItem(
+                        (level) => DropdownMenuItem<int>(
                           value: level,
-                          child: Text(_getSkillLevelText(level)),
+                          child: Text(_getSkillLevelText(level), overflow: TextOverflow.ellipsis),
                         ),
                       )
                       .toList(),
                   onChanged: (value) {
                     if (value != null) {
-                      setState(() => selectedLevel = value);
+                      controller.selectedSkillLevel.value = value;
                     }
                   },
                 ),
               ),
+              20.verticalSpace,
+              CustomButton(
+                text: 'btn_save'.tr,
+                onPressed: () {
+                  if (controller.skillCtrl.text.trim().isNotEmpty) {
+                    controller.addSkill();
+                    Get.back();
+                  }
+                },
+              ),
+              20.verticalSpace,
             ],
           ),
-          20.verticalSpace,
-          CustomButton(
-            text: 'btn_save'.tr,
-            onPressed: () {
-              if (controller.skillCtrl.text.isNotEmpty) {
-                // إضافة المهارة مع المستوى
-                controller.skillsList.add(
-                  CvSkill(
-                    name: controller.skillCtrl.text,
-                    level: selectedLevel,
-                  ),
-                );
-                controller.skillCtrl.clear();
-                Get.back();
-              }
-            },
-          ),
-          20.verticalSpace,
-        ],
+        ),
       ),
     );
   }
