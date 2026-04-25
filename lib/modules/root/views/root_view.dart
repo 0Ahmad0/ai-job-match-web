@@ -15,6 +15,33 @@ class RootView extends GetView<RootController> {
         controller.tabsVersion.value;
         return controller.pages[controller.currentIndex.value];
       }),
+      floatingActionButton: Obx(() {
+        final showFab = controller.userRole.value == 'jobSeeker' &&
+            controller.currentIndex.value == 0;
+        if (!showFab) {
+          return const SizedBox.shrink();
+        }
+
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: context.theme.primaryColor.withValues(
+                  alpha: controller.fabGlow.value ? 0.55 : 0.28,
+                ),
+                blurRadius: controller.fabGlow.value ? 28 : 12,
+                spreadRadius: controller.fabGlow.value ? 7 : 2,
+              ),
+            ],
+          ),
+          child: FloatingActionButton(
+            onPressed: controller.openPlatformChatbot,
+            child: const Icon(Icons.smart_toy_outlined),
+          ),
+        );
+      }),
       bottomNavigationBar: Obx(() {
         controller.tabsVersion.value;
         return CurvedNavigationBar(

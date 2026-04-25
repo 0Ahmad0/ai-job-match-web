@@ -150,7 +150,15 @@ class AiAnalyzerController extends GetxController {
         'cv_uploaded': true,
         'cv_file_name': fileName.value,
         'cv_file_url': cvUrl,
+        'cv_files': [
+          {
+            'name': fileName.value,
+            'url': cvUrl,
+            'creationMethod': 'AI_Analysis',
+          }
+        ],
         'cv_uploaded_at': FieldValue.serverTimestamp(),
+        'creationMethod': 'AI_Analysis',
         'ai_job_title': jobTitle,
         'ai_extracted_skills': extractedSkills,
         'ai_ats_score': atsScore,

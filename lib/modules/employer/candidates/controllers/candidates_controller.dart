@@ -145,7 +145,12 @@ class CandidatesController extends GetxController {
   ///   applied/under_review -> interview_scheduled
   ///   interview_scheduled -> accepted (terminal)
   ///   interview_scheduled -> rejected (terminal)
-  Future<void> performAction(String actionKey, CandidateModel candidate, {Map<String, dynamic>? interviewDetails}) async {
+  Future<void> performAction(
+    String actionKey,
+    CandidateModel candidate, {
+    Map<String, dynamic>? interviewDetails,
+    String? rejectionReason,
+  }) async {
     final currentStatus = candidate.status.toLowerCase();
 
     // Validate action based on current status (state machine)
@@ -169,6 +174,11 @@ class CandidatesController extends GetxController {
     if (actionKey == 'action_reject') {
       updateData['status'] = 'rejected';
       updateData['decision'] = 'rejected';
+      final reason = (rejectionReason ?? '').trim();
+      if (reason.isNotEmpty) {
+        updateData['rejectionReason'] = reason;
+        updateData['rejection_reason'] = reason;
+      }
     } else if (actionKey == 'action_accept') {
       updateData['status'] = 'accepted';
       updateData['decision'] = 'accepted';
@@ -243,6 +253,7 @@ class CandidatesController extends GetxController {
           companyName: companyName,
           status: appStatus,
           interviewDate: interviewDateToSend,
+          rejectionReason: actionKey == 'action_reject' ? rejectionReason : null,
         );
       }
 

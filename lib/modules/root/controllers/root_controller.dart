@@ -17,11 +17,13 @@ import '../../employer/post_job/views/post_job_view.dart';
 import '../../jobs/views/jobs_view.dart';
 import '../../profile/views/profile_view.dart';
 import '../../seeker_home/views/seeker_home_view.dart';
+import '../views/widgets/platform_chat_sheet.dart';
 
 class RootController extends GetxController {
   final currentIndex = 0.obs;
   final userRole = 'jobSeeker'.obs;
   final tabsVersion = 0.obs;
+  final fabGlow = false.obs;
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -162,6 +164,17 @@ class RootController extends GetxController {
 
   void changePage(int index) {
     currentIndex.value = index;
+  }
+
+  Future<void> openPlatformChatbot() async {
+    fabGlow.value = true;
+    await Future<void>.delayed(const Duration(milliseconds: 220));
+    fabGlow.value = false;
+    await Get.bottomSheet(
+      const PlatformChatSheet(),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+    );
   }
 
   Widget _buildIcon(IconData icon) {

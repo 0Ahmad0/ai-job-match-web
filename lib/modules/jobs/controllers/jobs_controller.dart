@@ -23,6 +23,9 @@ class JobsController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  String _userTargetTitle = '';
+  List<String> _userProfileKeywords = const <String>[];
+
   @override
   void onInit() {
     super.onInit();
@@ -67,10 +70,9 @@ class JobsController extends GetxController {
           .where((id) => id.isNotEmpty)
           .toSet();
 
-      final extractedSkills = ((userData['ai_extracted_skills'] as List?) ?? const [])
-          .map((e) => e.toString())
-          .where((e) => e.trim().isNotEmpty)
-          .toList();
+      final extractedSkills = _collectUserSkills(userData);
+      _userTargetTitle = _resolveUserTargetTitle(userData);
+      _userProfileKeywords = _collectUserKeywords(userData);
 
       userSkills.assignAll(extractedSkills);
 
@@ -91,11 +93,19 @@ class JobsController extends GetxController {
             .map((e) => e.toString())
             .where((e) => e.trim().isNotEmpty)
             .toList();
+        final requirements = ((data['requirements'] as List?) ?? const [])
+            .map((e) => e.toString())
+            .where((e) => e.trim().isNotEmpty)
+            .toList();
 
-        final score = MatcherUtil.calculateMatchPercentage(
+        final score = MatcherUtil.calculateEnhancedMatchPercentage(
           requiredSkills: requiredSkills,
           userSkills: userSkills,
-        ).round();
+          jobRequirements: requirements,
+          userProfileKeywords: _userProfileKeywords,
+          jobTitle: (data['title'] as String?) ?? '',
+          userTargetTitle: _userTargetTitle,
+        );
 
         final salaryMin = data['salary_min'] ?? 0;
         final salaryMax = data['salary_max'] ?? 0;
@@ -112,7 +122,7 @@ class JobsController extends GetxController {
           postedTime: '',
           description: (data['description'] as String?) ?? '',
           requiredSkills: requiredSkills,
-          requirements: requiredSkills,
+          requirements: requirements.isNotEmpty ? requirements : requiredSkills,
         );
       }).toList();
 
@@ -153,6 +163,50 @@ class JobsController extends GetxController {
     appliedJobIds.clear();
     isCvUploaded.value = false;
     errorMessage.value = '';
+    _userTargetTitle = '';
+    _userProfileKeywords = const <String>[];
+  }
+
+  List<String> _collectUserSkills(Map<String, dynamic> userData) {
+    final aiSkills = ((userData['ai_extracted_skills'] as List?) ?? const [])
+        .map((e) => e.toString())
+        .where((e) => e.trim().isNotEmpty);
+    final manualCv = (userData['manual_cv'] as Map<String, dynamic>?) ?? const <String, dynamic>{};
+    final manualSkills = ((manualCv['skills'] as List?) ?? const [])
+        .map((e) => e is Map ? (e['name']?.toString() ?? '') : e.toString())
+        .where((e) => e.trim().isNotEmpty);
+
+    return <String>{...aiSkills, ...manualSkills}.toList();
+  }
+
+  String _resolveUserTargetTitle(Map<String, dynamic> userData) {
+    final manualCv = (userData['manual_cv'] as Map<String, dynamic>?) ?? const <String, dynamic>{};
+    final candidates = <String>[
+      (manualCv['jobTitle'] as String?) ?? '',
+      (userData['ai_job_title'] as String?) ?? '',
+      (userData['headline'] as String?) ?? '',
+      (userData['jobTitle'] as String?) ?? '',
+    ];
+    for (final value in candidates) {
+      if (value.trim().isNotEmpty) {
+        return value.trim();
+      }
+    }
+    return '';
+  }
+
+  List<String> _collectUserKeywords(Map<String, dynamic> userData) {
+    final manualCv = (userData['manual_cv'] as Map<String, dynamic>?) ?? const <String, dynamic>{};
+    final summary = (manualCv['summary'] as String?) ?? (userData['bio'] as String?) ?? '';
+    final experiences = ((manualCv['experience'] as List?) ?? const [])
+        .map((e) => e is Map ? (e['description']?.toString() ?? '') : '')
+        .where((e) => e.trim().isNotEmpty)
+        .toList();
+    return <String>[
+      summary,
+      _userTargetTitle,
+      ...experiences,
+    ].where((e) => e.trim().isNotEmpty).toList();
   }
 
   @override

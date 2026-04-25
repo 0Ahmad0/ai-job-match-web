@@ -124,6 +124,8 @@ class ApplyBottomSheet extends StatelessWidget {
         'job_seeker_name': applicantName,
         'status': 'applied',
         'decision': 'applied',
+        'rejectionReason': '',
+        'rejection_reason': '',
         'skills': skills,
         'match_score': job.matchScore,
         'cv_file_name': cvName,

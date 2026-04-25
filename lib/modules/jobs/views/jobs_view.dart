@@ -72,19 +72,37 @@ class JobsView extends GetView<JobsController> {
                   );
                 }
 
-                return ListView.builder(
-                  padding: EdgeInsets.zero,
-                  itemCount: controller.displayedJobs.length,
-                  itemBuilder: (context, index) {
-                    final job = controller.displayedJobs[index];
-                    return JobCardWidget(
-                      job: job,
-                      isApplied: controller.hasApplied(job.id),
-                      onTap: () => Get.toNamed(Routes.JOB_DETAILS, arguments: job),
-                    )
-                        .animate()
-                        .fade(duration: 300.ms)
-                        .slideY(begin: 0.08, end: 0, delay: (index * 30).ms);
+                final jobs = controller.displayedJobs;
+                final crossAxisCount = jobs.length > 1 ? 2 : 1;
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    final spacing = 14.w;
+                    final maxWidth = constraints.maxWidth;
+                    final cardWidth =
+                        (maxWidth - ((crossAxisCount - 1) * spacing)) / crossAxisCount;
+                    final cardHeight = cardWidth / 1.22;
+
+                    return GridView.builder(
+                      padding: EdgeInsets.zero,
+                      itemCount: jobs.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        crossAxisSpacing: spacing,
+                        mainAxisSpacing: spacing,
+                        childAspectRatio: cardWidth / cardHeight,
+                      ),
+                      itemBuilder: (context, index) {
+                        final job = jobs[index];
+                        return JobCardWidget(
+                          job: job,
+                          isApplied: controller.hasApplied(job.id),
+                          onTap: () => Get.toNamed(Routes.JOB_DETAILS, arguments: job),
+                        )
+                            .animate()
+                            .fade(duration: 300.ms)
+                            .slideY(begin: 0.08, end: 0, delay: (index * 30).ms);
+                      },
+                    );
                   },
                 );
               }),

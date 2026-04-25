@@ -10,6 +10,8 @@ import 'package:printing/printing.dart';
 import '../models/cv_model.dart';
 
 class PdfService {
+  bool _forceRtl = false;
+
   Future<Uint8List> generateCVBytes(
     CvModel data,
     int templateIndex, {
@@ -26,18 +28,25 @@ class PdfService {
     pw.Font? arabicItalicFont;
 
     if (isRtl || hasArabic) {
-      // Use Tajawal font for proper Arabic text rendering
-      arabicFont = await PdfGoogleFonts.tajawalRegular();
-      arabicBoldFont = await PdfGoogleFonts.tajawalBold();
-      arabicItalicFont = await PdfGoogleFonts.tajawalMedium();
+      try {
+        arabicFont = await PdfGoogleFonts.iBMPlexMonoRegular();
+        arabicBoldFont = await PdfGoogleFonts.iBMPlexMonoBold();
+        arabicItalicFont = arabicFont;
+      } catch (_) {
+        arabicFont = await PdfGoogleFonts.cairoRegular();
+        arabicBoldFont = await PdfGoogleFonts.cairoBold();
+        arabicItalicFont = await PdfGoogleFonts.cairoSemiBold();
+      }
     }
 
+    _forceRtl = isRtl || hasArabic;
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(32),
+        textDirection: _forceRtl ? pw.TextDirection.rtl : pw.TextDirection.ltr,
         theme: _buildTheme(
-          isRtl || hasArabic,
+          _forceRtl,
           arabicFont,
           arabicBoldFont,
           arabicItalicFont,
@@ -550,6 +559,9 @@ class PdfService {
   }
 
   pw.TextDirection _textDirectionFor(String text) {
+    if (_forceRtl) {
+      return pw.TextDirection.rtl;
+    }
     return _isArabicText(text) ? pw.TextDirection.rtl : pw.TextDirection.ltr;
   }
 

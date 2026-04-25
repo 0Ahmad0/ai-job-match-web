@@ -84,6 +84,31 @@ class VerifyContentWidget extends GetView<OtpController> {
             ),
           ),
           12.verticalSpace,
+          Obx(
+            () => SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: controller.isCheckingVerification.value
+                    ? null
+                    : controller.manualRefreshStatus,
+                icon: controller.isCheckingVerification.value
+                    ? SizedBox(
+                        width: 16.w,
+                        height: 16.w,
+                        child: const CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.refresh),
+                label: Text('btn_refresh_status'.tr),
+                style: OutlinedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(vertical: 14.h),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14.r),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          12.verticalSpace,
           Text(
             'resend_email'.tr,
             textAlign: TextAlign.center,

@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import '../../../data/models/cv_model.dart';
 import '../../../data/services/gemini_service.dart';
 import '../../../data/services/pdf_service.dart';
+import '../../../routes/app_routes.dart';
 import '../views/cv_preview_view.dart';
 
 class CvBuilderController extends GetxController {
@@ -90,45 +91,42 @@ class CvBuilderController extends GetxController {
       final isNew = (args['isNew'] as bool?) ?? false;
       final fixPayload = (args['fixPayload'] as Map<String, dynamic>?) ?? const <String, dynamic>{};
 
-      // If creating new CV, prefill with account/profile data
-      if (isNew) {
-        _prefillFromAccountData(data, user);
+      // Fix flow must use the latest AI payload only (not old draft data).
+      if (fixPayload.isNotEmpty) {
+        _resetAllFields();
+        _applyFixPayload(fixPayload);
+      } else if (isNew) {
+        // New CV from scratch: keep everything empty.
+        _resetAllFields();
       } else {
         // Load existing draft
         final manualCv = (data['manual_cv'] as Map<String, dynamic>?) ?? const <String, dynamic>{};
         _loadFromManualCv(manualCv, data, user);
-      }
-
-      if (fixPayload.isNotEmpty) {
-        _applyFixPayload(fixPayload);
       }
     } finally {
       isLoading.value = false;
     }
   }
 
-  void _prefillFromAccountData(Map<String, dynamic> userData, User user) {
-    // Clear all fields for new CV
-    nameCtrl.text = (userData['fullName'] as String?) ?? user.displayName ?? '';
-    emailCtrl.text = (userData['email'] as String?) ?? (user.email ?? '');
-    phoneCtrl.text = (userData['phone'] as String?) ?? '';
-    addressCtrl.text = (userData['address'] as String?) ?? '';
-    linkedinCtrl.text = (userData['linkedin'] as String?) ?? '';
-    summaryCtrl.text = (userData['bio'] as String?) ?? '';
+  void _resetAllFields() {
+    nameCtrl.clear();
+    emailCtrl.clear();
+    phoneCtrl.clear();
+    addressCtrl.clear();
+    linkedinCtrl.clear();
+    summaryCtrl.clear();
+    jobTitleCtrl.clear();
 
-    // Clear lists for new CV
     experiences.clear();
     educations.clear();
     skillsList.clear();
     projects.clear();
-
-    // Prefill skills from AI extracted skills if available
-    final aiSkills = ((userData['ai_extracted_skills'] as List?) ?? const [])
-        .map((e) => CvSkill(name: e.toString(), level: 3))
-        .toList();
-    if (aiSkills.isNotEmpty) {
-      skillsList.assignAll(aiSkills);
-    }
+    highlightedSections.clear();
+    aiSuggestions.clear();
+    atsScore.value = 0;
+    detectedCvLanguage.value = 'en';
+    selectedTemplate.value = 1;
+    currentStep.value = 0;
   }
 
   void _loadFromManualCv(Map<String, dynamic> manualCv, Map<String, dynamic> userData, User user) {
@@ -295,7 +293,7 @@ class CvBuilderController extends GetxController {
 
   void removeSkill(CvSkill skill) => skillsList.remove(skill);
 
-  Future<void> saveDraft() async {
+  Future<void> saveDraft({bool showFeedback = true}) async {
     final user = _auth.currentUser;
     if (user == null) {
       return;
@@ -307,11 +305,45 @@ class CvBuilderController extends GetxController {
         'manual_cv': _buildManualCvPayload(),
         'updatedAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
-      Get.snackbar('success_title'.tr, 'cv_saved_draft'.tr);
+      if (showFeedback) {
+        Get.snackbar('success_title'.tr, 'cv_saved_draft'.tr);
+      }
     } catch (e) {
-      Get.snackbar('err_title'.tr, 'cv_save_error'.trParams({'error': e.toString()}));
+      if (showFeedback) {
+        Get.snackbar('err_title'.tr, 'cv_save_error'.trParams({'error': e.toString()}));
+      }
+      rethrow;
     } finally {
       isSaving.value = false;
+    }
+  }
+
+  Future<void> finalizeCvAndGoHome() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      Get.snackbar('err_title'.tr, 'auth_err_no_user_logged_in'.tr);
+      return;
+    }
+
+    _populateCvData();
+    if (cvData.fullName.isEmpty) {
+      highlightedSections.add('personal');
+      Get.snackbar('err_title'.tr, 'err_name_required'.tr);
+      return;
+    }
+
+    try {
+      await saveDraft(showFeedback: false);
+      Get.offAllNamed(Routes.HOME, arguments: {'role': 'jobSeeker', 'index': 0});
+      Get.rawSnackbar(
+        message: 'cv_saved_draft'.tr,
+        duration: const Duration(seconds: 2),
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(12),
+        borderRadius: 10,
+      );
+    } catch (_) {
+      Get.snackbar('err_title'.tr, 'cv_save_error'.trParams({'error': 'save_failed'}));
     }
   }
 
@@ -537,6 +569,7 @@ class CvBuilderController extends GetxController {
       'selectedTemplate': selectedTemplate.value,
       'language': detectedCvLanguage.value,
       'suggestions': aiSuggestions.toList(),
+      'creationMethod': 'Manual_Creation',
     };
   }
 

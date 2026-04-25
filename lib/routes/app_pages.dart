@@ -111,6 +111,12 @@ class AppPages {
       middlewares: [AuthMiddleware()],
     ),
     GetPage(
+      name: Routes.HOME,
+      page: () => const RootView(),
+      binding: RootBinding(),
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
       name: Routes.SEEKER_HOME,
       page: () => const SeekerHomeView(),
       bindings: [JobSeekerBinding(), SeekerHomeBinding(), JobsBinding()],

@@ -57,7 +57,8 @@ class ProfileStatsWidget extends GetView<ProfileController> {
   }
 
   Widget _buildStatItem(BuildContext context, String value, String label, IconData icon) {
-    return Flexible(
+    return SizedBox(
+      width: 120.w,
       child: Column(
         children: [
           Container(

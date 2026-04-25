@@ -20,7 +20,10 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
         ),
         backgroundColor: Colors.redAccent.withOpacity(0.1),
         actions: [
-          IconButton(onPressed: () {}, icon: const Icon(Icons.settings)),
+          IconButton(
+            onPressed: controller.loadPendingData,
+            icon: const Icon(Icons.refresh),
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -34,54 +37,56 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
             ),
             15.verticalSpace,
             Obx(
-              () => GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 2,
-                crossAxisSpacing: 15.w,
-                mainAxisSpacing: 15.h,
-                childAspectRatio: 1.4,
-                children: [
-                  FadeInUp(
-                    delay: const Duration(milliseconds: 100),
-                    child: AdminStatCard(
-                      title: 'lbl_total_users'.tr,
-                      value: controller.usersList.length.toString(),
-                      icon: FontAwesomeIcons.users,
-                      color: Colors.blue,
-                    ),
-                  ),
-                  FadeInUp(
-                    delay: const Duration(milliseconds: 200),
-                    child: AdminStatCard(
-                      title: 'lbl_pending_companies'.tr,
-                      value: controller.usersList
-                          .where((u) => u['status'] == 'Pending')
-                          .length
-                          .toString(),
-                      icon: FontAwesomeIcons.hourglassHalf,
-                      color: Colors.orange,
-                    ),
-                  ),
-                  FadeInUp(
-                    delay: const Duration(milliseconds: 300),
-                    child: AdminStatCard(
-                      title: 'lbl_admin_jobs'.tr,
-                      value: controller.jobRequests.length.toString(),
-                      icon: FontAwesomeIcons.briefcase,
-                      color: Colors.purple,
-                    ),
-                  ),
-                  FadeInUp(
-                    delay: const Duration(milliseconds: 400),
-                    child: AdminStatCard(
-                      title: 'lbl_revenue'.tr,
-                      value: '\$12k',
-                      icon: FontAwesomeIcons.moneyBillWave,
-                      color: Colors.green,
-                    ),
-                  ),
-                ],
+              () => LayoutBuilder(
+                builder: (context, constraints) {
+                  final crossAxisCount = constraints.maxWidth < 700 ? 2 : 4;
+                  return GridView.count(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    crossAxisCount: crossAxisCount,
+                    crossAxisSpacing: 15.w,
+                    mainAxisSpacing: 15.h,
+                    childAspectRatio: 1.25,
+                    children: [
+                      FadeInUp(
+                        delay: const Duration(milliseconds: 100),
+                        child: AdminStatCard(
+                          title: 'lbl_total_users'.tr,
+                          value: controller.totalUsersCount.value.toString(),
+                          icon: FontAwesomeIcons.users,
+                          color: Colors.blue,
+                        ),
+                      ),
+                      FadeInUp(
+                        delay: const Duration(milliseconds: 200),
+                        child: AdminStatCard(
+                          title: 'lbl_pending_companies'.tr,
+                          value: controller.pendingCompaniesCount.value.toString(),
+                          icon: FontAwesomeIcons.hourglassHalf,
+                          color: Colors.orange,
+                        ),
+                      ),
+                      FadeInUp(
+                        delay: const Duration(milliseconds: 300),
+                        child: AdminStatCard(
+                          title: 'lbl_admin_jobs'.tr,
+                          value: controller.pendingJobsCount.value.toString(),
+                          icon: FontAwesomeIcons.briefcase,
+                          color: Colors.purple,
+                        ),
+                      ),
+                      FadeInUp(
+                        delay: const Duration(milliseconds: 400),
+                        child: AdminStatCard(
+                          title: 'profile_stat_active_jobs'.tr,
+                          value: controller.approvedJobsCount.value.toString(),
+                          icon: FontAwesomeIcons.moneyBillWave,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ],

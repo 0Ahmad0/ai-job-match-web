@@ -54,14 +54,14 @@ class JobCardWidget extends StatelessWidget {
                   ),
                   child: const Icon(Icons.business_center_outlined, color: Color(0xFF1456F1)),
                 ),
-                SizedBox(
-                  width: 430.w,
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: 220.w, minWidth: 130.w),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(job.title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp), maxLines: 1, overflow: TextOverflow.ellipsis),
                       6.verticalSpace,
-                      Text(job.company, style: TextStyle(color: Colors.grey, fontSize: 12.sp)),
+                      Text(job.company, style: TextStyle(color: Colors.grey, fontSize: 12.sp), maxLines: 1, overflow: TextOverflow.ellipsis),
                     ],
                   ),
                 ),

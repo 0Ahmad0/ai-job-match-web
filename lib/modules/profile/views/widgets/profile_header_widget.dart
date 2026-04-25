@@ -22,54 +22,79 @@ class ProfileHeaderWidget extends GetView<ProfileController> {
           boxShadow: AppTheme.shadowLarge,
         ),
         child: Obx(
-          () => Wrap(
-            spacing: AppTheme.spacing18.w,
-            runSpacing: AppTheme.spacing18.h,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              AppUserAvatar(
-                name: controller.userName.value,
-                imageUrl: controller.userImage.value,
-                radius: 38,
-              ),
-              Expanded(
-                child: Column(
+          () {
+            final userName = controller.userName.value;
+            final userJob = controller.userJob.value;
+            final userEmail = controller.userEmail.value;
+            final userBio = controller.userBio.value;
+            final userImage = controller.userImage.value;
+
+            return LayoutBuilder(
+            builder: (context, constraints) {
+              final details = Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    userName,
+                    style: context.textTheme.headlineSmall?.copyWith(
+                      color: Colors.white,
+                    ),
+                  ),
+                  AppTheme.spacing6.verticalSpace,
+                  Text(
+                    userJob,
+                    style: context.textTheme.bodyLarge?.copyWith(
+                      color: Colors.white.withValues(alpha: 0.92),
+                    ),
+                  ),
+                  AppTheme.spacing6.verticalSpace,
+                  Text(
+                    userEmail,
+                    style: context.textTheme.bodyMedium?.copyWith(
+                      color: Colors.white.withValues(alpha: 0.78),
+                    ),
+                  ),
+                  if (userBio.isNotEmpty) ...[
+                    AppTheme.spacing12.verticalSpace,
+                    Text(
+                      userBio,
+                      style: context.textTheme.bodyMedium?.copyWith(
+                        color: Colors.white.withValues(alpha: 0.88),
+                      ),
+                    ),
+                  ],
+                ],
+              );
+
+              if (constraints.maxWidth < 560.w) {
+                return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      controller.userName.value,
-                      style: context.textTheme.headlineSmall?.copyWith(
-                        color: Colors.white,
-                      ),
+                    AppUserAvatar(
+                      name: userName,
+                      imageUrl: userImage,
+                      radius: 38,
                     ),
-                    AppTheme.spacing6.verticalSpace,
-                    Text(
-                      controller.userJob.value,
-                      style: context.textTheme.bodyLarge?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.92),
-                      ),
-                    ),
-                    AppTheme.spacing6.verticalSpace,
-                    Text(
-                      controller.userEmail.value,
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.78),
-                      ),
-                    ),
-                    if (controller.userBio.value.isNotEmpty) ...[
-                      AppTheme.spacing12.verticalSpace,
-                      Text(
-                        controller.userBio.value,
-                        style: context.textTheme.bodyMedium?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.88),
-                        ),
-                      ),
-                    ],
+                    AppTheme.spacing18.verticalSpace,
+                    details,
                   ],
-                ),
-              ),
-            ],
-          ),
+                );
+              }
+
+              return Row(
+                children: [
+                  AppUserAvatar(
+                    name: userName,
+                    imageUrl: userImage,
+                    radius: 38,
+                  ),
+                  AppTheme.spacing18.horizontalSpace,
+                  Expanded(child: details),
+                ],
+              );
+            },
+          );
+          },
         ),
       ),
     );

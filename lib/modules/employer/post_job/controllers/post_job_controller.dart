@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../data/services/gemini_service.dart';
+
 class PostJobController extends GetxController {
   final currentStep = 0.obs;
 
@@ -11,20 +13,36 @@ class PostJobController extends GetxController {
   final minSalaryCtrl = TextEditingController();
   final maxSalaryCtrl = TextEditingController();
   final descriptionCtrl = TextEditingController();
+  final skillInputCtrl = TextEditingController();
 
   final selectedJobType = 'Full Time'.obs;
   final jobTypes = ['Full Time', 'Part Time', 'Remote', 'Contract'];
+  final requiredSkills = <String>[].obs;
+  final aiRequirements = <String>[].obs;
 
   final isAiWriting = false.obs;
   final isPublishing = false.obs;
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  late final GeminiService _geminiService;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _geminiService = Get.isRegistered<GeminiService>()
+        ? Get.find<GeminiService>()
+        : Get.put(GeminiService(), permanent: true);
+  }
 
   void nextStep() {
     if (currentStep.value == 0) {
-      if (titleCtrl.text.isEmpty || locationCtrl.text.isEmpty) {
+      if (titleCtrl.text.trim().isEmpty || locationCtrl.text.trim().isEmpty) {
         Get.snackbar('err_title'.tr, 'err_fill_basic_details'.tr);
+        return;
+      }
+      if (requiredSkills.length < 3) {
+        Get.snackbar('err_title'.tr, 'job_skills_min_error'.tr);
         return;
       }
       currentStep.value = 1;
@@ -40,18 +58,83 @@ class PostJobController extends GetxController {
     }
   }
 
+  void addSkillFromInput() {
+    final raw = skillInputCtrl.text.trim();
+    if (raw.isEmpty) {
+      return;
+    }
+    final parts = raw
+        .split(RegExp(r'[,;\n]'))
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+    for (final part in parts) {
+      _addSkill(part);
+    }
+    skillInputCtrl.clear();
+  }
+
+  void removeSkill(String skill) {
+    requiredSkills.removeWhere((s) => s.toLowerCase() == skill.toLowerCase());
+  }
+
+  void _addSkill(String skill) {
+    final clean = skill.trim();
+    if (clean.isEmpty) {
+      return;
+    }
+    final exists = requiredSkills.any((s) => s.toLowerCase() == clean.toLowerCase());
+    if (!exists) {
+      requiredSkills.add(clean);
+    }
+  }
+
   Future<void> autoWriteDescription() async {
-    if (titleCtrl.text.isEmpty) {
+    if (titleCtrl.text.trim().isEmpty) {
       Get.snackbar('err_title'.tr, 'err_enter_job_title'.tr);
       return;
     }
 
     isAiWriting.value = true;
-    await Future.delayed(const Duration(seconds: 2));
-    descriptionCtrl.text = 'msg_ai_job_desc_template'.trParams({
-      'title': titleCtrl.text,
-    });
-    isAiWriting.value = false;
+    try {
+      final draft = await _geminiService.generateJobDraft(
+        jobTitle: titleCtrl.text.trim(),
+        jobType: selectedJobType.value,
+        location: locationCtrl.text.trim(),
+        preferredSkills: requiredSkills,
+        languageCode: Get.locale?.languageCode ?? 'en',
+      );
+
+      if (draft == null) {
+        descriptionCtrl.text = 'msg_ai_job_desc_template'.trParams({'title': titleCtrl.text.trim()});
+        return;
+      }
+
+      final draftDescription = (draft['description'] as String?)?.trim() ?? '';
+      final draftSkills = ((draft['required_skills'] as List?) ?? const [])
+          .map((e) => e.toString().trim())
+          .where((e) => e.isNotEmpty)
+          .toList();
+      final draftRequirements = ((draft['requirements'] as List?) ?? const [])
+          .map((e) => e.toString().trim())
+          .where((e) => e.isNotEmpty)
+          .toList();
+
+      if (draftDescription.isNotEmpty) {
+        descriptionCtrl.text = draftDescription;
+      }
+
+      for (final skill in draftSkills) {
+        _addSkill(skill);
+      }
+      aiRequirements.assignAll(draftRequirements);
+      Get.snackbar('success_title'.tr, 'job_ai_generated_success'.tr);
+    } catch (e) {
+      descriptionCtrl.text = 'msg_ai_job_desc_template'.trParams({'title': titleCtrl.text.trim()});
+      Get.snackbar('err_title'.tr, 'job_ai_generated_fallback'.tr);
+    } finally {
+      isAiWriting.value = false;
+    }
   }
 
   Future<void> publishJob() async {
@@ -73,7 +156,11 @@ class PostJobController extends GetxController {
           user.email ??
           'unknown_company'.tr;
 
-      final requiredSkills = _extractRequiredSkills(descriptionCtrl.text);
+      final extractedFromDescription = _extractRequiredSkills(descriptionCtrl.text);
+      final mergedSkills = <String>{...requiredSkills, ...extractedFromDescription}.toList();
+      final requirementsToSave = aiRequirements.isNotEmpty
+          ? aiRequirements.toList()
+          : _extractRequirements(descriptionCtrl.text, mergedSkills);
 
       await _firestore.collection('jobs').add({
         'title': titleCtrl.text.trim(),
@@ -84,7 +171,8 @@ class PostJobController extends GetxController {
         'salary_min': int.tryParse(minSalaryCtrl.text.trim()) ?? 0,
         'salary_max': int.tryParse(maxSalaryCtrl.text.trim()) ?? 0,
         'description': descriptionCtrl.text.trim(),
-        'required_skills': requiredSkills,
+        'required_skills': mergedSkills.take(20).toList(),
+        'requirements': requirementsToSave.take(15).toList(),
         'status': 'pending',
         'created_at': FieldValue.serverTimestamp(),
         'updated_at': FieldValue.serverTimestamp(),
@@ -111,30 +199,35 @@ class PostJobController extends GetxController {
   }
 
   List<String> _extractRequiredSkills(String text) {
-    final lines = text.split('\n');
-    final skills = <String>{};
-
-    for (final raw in lines) {
-      final line = raw.trim();
-      if (line.startsWith('-')) {
-        final skill = line.replaceFirst('-', '').trim();
-        if (skill.isNotEmpty) {
-          skills.add(skill);
-        }
-      }
+    final words = text
+        .split(RegExp(r'[^a-zA-Z0-9#+./-]+'))
+        .map((e) => e.trim())
+        .where((e) => e.length >= 2 && e.length <= 40)
+        .toList();
+    final unique = <String>{};
+    for (final word in words) {
+      if (RegExp(r'^\d+$').hasMatch(word)) continue;
+      unique.add(word);
+      if (unique.length >= 20) break;
     }
+    return unique.toList();
+  }
 
-    if (skills.isEmpty) {
-      final words = titleCtrl.text
-          .toLowerCase()
-          .split(RegExp(r'[^a-zA-Z]+'))
-          .where((w) => w.length > 2)
-          .toSet()
-          .toList();
-      skills.addAll(words.take(5));
+  List<String> _extractRequirements(String description, List<String> skills) {
+    final lines = description
+        .split('\n')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+    final bullets = lines.where((line) => line.startsWith('-') || line.startsWith('•')).toList();
+    final normalized = bullets
+        .map((line) => line.replaceFirst(RegExp(r'^[-•]\s*'), '').trim())
+        .where((line) => line.isNotEmpty)
+        .toList();
+    if (normalized.isNotEmpty) {
+      return normalized;
     }
-
-    return skills.take(15).toList();
+    return skills.take(8).map((s) => '${'job_requirement_with_skill'.trParams({'skill': s})}.').toList();
   }
 
   void _clearForm() {
@@ -143,6 +236,9 @@ class PostJobController extends GetxController {
     minSalaryCtrl.clear();
     maxSalaryCtrl.clear();
     descriptionCtrl.clear();
+    skillInputCtrl.clear();
+    requiredSkills.clear();
+    aiRequirements.clear();
     selectedJobType.value = jobTypes.first;
     currentStep.value = 0;
   }
@@ -154,6 +250,7 @@ class PostJobController extends GetxController {
     minSalaryCtrl.dispose();
     maxSalaryCtrl.dispose();
     descriptionCtrl.dispose();
+    skillInputCtrl.dispose();
     super.onClose();
   }
 }

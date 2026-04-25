@@ -14,10 +14,6 @@ class AiAnalyzerView extends GetView<AiAnalyzerController> {
       appBar: AppBar(
         title: Text('ai_title'.tr),
         centerTitle: true,
-        actions: [
-          // زر وهمي لإظهار الهيبة
-          IconButton(onPressed: (){}, icon: const Icon(Icons.history))
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),

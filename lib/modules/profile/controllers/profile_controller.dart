@@ -78,7 +78,9 @@ class ProfileController extends GetxController {
       userEmail.value = (data['email'] as String?) ?? (user.email ?? '');
       userName.value = _resolveDisplayName(data, user);
       userJob.value = _resolveHeadline(data);
-      userBio.value = (data['bio'] as String?) ?? '';
+      userBio.value = ((data['bio'] as String?)?.trim().isNotEmpty == true)
+          ? (data['bio'] as String).trim()
+          : ((data['aboutYou'] as String?)?.trim() ?? '');
       userImage.value = (data['profile_image_url'] as String?) ?? '';
 
       editNameCtrl.text = userName.value;
@@ -200,11 +202,13 @@ class ProfileController extends GetxController {
       }
 
       final isCompany = userRole.value == 'company';
+      final aboutYou = editBioCtrl.text.trim();
       final payload = <String, dynamic>{
         'updatedAt': FieldValue.serverTimestamp(),
         'profile_image_url': uploadedAvatarUrl ?? '',
         'headline': editJobCtrl.text.trim(),
-        'bio': editBioCtrl.text.trim(),
+        'bio': aboutYou,
+        'aboutYou': aboutYou,
       };
       if (isCompany) {
         payload['companyName'] = editNameCtrl.text.trim();

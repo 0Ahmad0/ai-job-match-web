@@ -138,6 +138,117 @@ class GeminiService extends GetxService {
     }
   }
 
+  Future<String> askPlatformAssistant(
+    String userQuestion, {
+    required String preferredLanguageCode,
+  }) async {
+    final question = userQuestion.trim();
+    if (question.isEmpty) {
+      return '';
+    }
+
+    await init();
+    final lang = preferredLanguageCode.toLowerCase() == 'ar' ? 'ar' : 'en';
+    final systemPrompt = '''
+You are a helpful assistant for the AI Job Matcher platform.
+Your job is to answer users about:
+1) How to use platform features (CV builder, AI analyzer, applying to jobs, tracking applications).
+2) Job-search and hiring tips.
+
+Rules:
+- Be concise and practical.
+- If asked unrelated dangerous/illegal content, refuse politely.
+- The final answer language MUST be: $lang.
+''';
+
+    final prompt = '$systemPrompt\n\nUser question:\n$question';
+    try {
+      final response = await _model.generateContent([Content.text(prompt)]);
+      return (response.text ?? '').trim();
+    } catch (e, stackTrace) {
+      developer.log(
+        'Error in platform assistant chat: $e',
+        name: 'GeminiService',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return '';
+    }
+  }
+
+  Future<Map<String, dynamic>?> generateJobDraft({
+    required String jobTitle,
+    required String jobType,
+    required String location,
+    required List<String> preferredSkills,
+    required String languageCode,
+  }) async {
+    final title = jobTitle.trim();
+    if (title.isEmpty) {
+      return null;
+    }
+
+    await init();
+    final lang = languageCode.toLowerCase() == 'ar' ? 'ar' : 'en';
+    final skills = preferredSkills
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+    final seedSkills = skills.isEmpty ? 'none' : skills.join(', ');
+
+    final prompt = '''
+You are a senior technical recruiter.
+Generate a realistic job draft based on the given role and skills.
+
+Inputs:
+- job_title: "$title"
+- job_type: "$jobType"
+- location: "$location"
+- preferred_skills: "$seedSkills"
+- output_language: "$lang"
+
+Return STRICT JSON only with this shape:
+{
+  "description": "string",
+  "required_skills": ["skill 1", "skill 2"],
+  "requirements": ["requirement 1", "requirement 2"]
+}
+
+Rules:
+- description must be practical and not generic filler.
+- required_skills should contain 8 to 14 focused skills used globally for this role.
+- requirements should contain 6 to 10 concise, measurable requirements.
+- Keep consistency between description, required_skills, and requirements.
+- If preferred_skills are provided, include the relevant ones.
+- Return valid JSON only.
+''';
+
+    try {
+      final response = await _model.generateContent([Content.text(prompt)]);
+      final parsed = _parseJsonObject(response.text);
+      if (parsed == null) {
+        return _fallbackJobDraft(
+          title: title,
+          skills: skills,
+          lang: lang,
+        );
+      }
+      return parsed;
+    } catch (e, stackTrace) {
+      developer.log(
+        'Error generating AI job draft: $e',
+        name: 'GeminiService',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return _fallbackJobDraft(
+        title: title,
+        skills: skills,
+        lang: lang,
+      );
+    }
+  }
+
   String _basePrompt(String input) {
     return '''
 You are an expert ATS (Applicant Tracking System) with 20+ years of experience in recruitment and HR.
@@ -204,4 +315,78 @@ The suggestions_for_improvement MUST be written in the same language as cv_langu
       return null;
     }
   }
+
+  Map<String, dynamic>? _parseJsonObject(String? responseText) {
+    if (responseText == null || responseText.trim().isEmpty) {
+      return null;
+    }
+
+    try {
+      var cleanedText = responseText.trim();
+      if (cleanedText.startsWith('```json')) {
+        cleanedText = cleanedText.substring(7);
+      }
+      if (cleanedText.startsWith('```')) {
+        cleanedText = cleanedText.substring(3);
+      }
+      if (cleanedText.endsWith('```')) {
+        cleanedText = cleanedText.substring(0, cleanedText.length - 3);
+      }
+      cleanedText = cleanedText.trim();
+      final parsed = jsonDecode(cleanedText);
+      if (parsed is Map<String, dynamic>) {
+        return parsed;
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Map<String, dynamic> _fallbackJobDraft({
+    required String title,
+    required List<String> skills,
+    required String lang,
+  }) {
+    final defaults = <String>[
+      'Communication',
+      'Problem Solving',
+      'Team Collaboration',
+      'Time Management',
+      'Documentation',
+    ];
+    final mergedSkills = <String>{...skills, ...defaults}.toList().take(10).toList();
+
+    if (lang == 'ar') {
+      return {
+        'description':
+            'نبحث عن $title يمتلك خبرة عملية وقدرة على تنفيذ المهام بكفاءة ضمن فريق متعاون، مع الالتزام بجودة التنفيذ والتحسين المستمر.',
+        'required_skills': mergedSkills,
+        'requirements': [
+          'خبرة عملية مناسبة في نفس المجال.',
+          'إتقان المهارات الأساسية المطلوبة للوظيفة.',
+          'قدرة عالية على حل المشكلات واتخاذ القرار.',
+          'مهارات تواصل فعالة والعمل ضمن فريق.',
+          'الالتزام بالمواعيد وجودة التسليم.',
+          'قابلية التعلم والتطور المستمر.',
+        ],
+      };
+    }
+
+    return {
+      'description':
+          'We are hiring a $title who can deliver high-quality outcomes, collaborate effectively with cross-functional teams, and continuously improve execution.',
+      'required_skills': mergedSkills,
+      'requirements': [
+        'Hands-on experience in a similar role.',
+        'Strong command of core technical and functional skills.',
+        'Solid problem-solving and decision-making ability.',
+        'Clear communication and team collaboration skills.',
+        'Consistent ownership of quality and deadlines.',
+        'Continuous learning mindset and adaptability.',
+      ],
+    };
+  }
 }
+
+

@@ -13,6 +13,7 @@ class ApplicationCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final statusMeta = _statusMeta(application.status);
+    final isInterview = application.status == AppStatus.interviewScheduled;
 
     return InkWell(
       onTap: () => Get.toNamed(Routes.TRACK_APPLICATION, arguments: application),
@@ -61,8 +62,13 @@ class ApplicationCardWidget extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 7.h),
                   decoration: BoxDecoration(
-                    color: statusMeta.color.withValues(alpha: 0.12),
+                    color: isInterview
+                        ? Colors.indigo.withValues(alpha: 0.12)
+                        : statusMeta.color.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(999.r),
+                    border: isInterview
+                        ? Border.all(color: Colors.indigo.withValues(alpha: 0.35))
+                        : null,
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
@@ -76,6 +82,16 @@ class ApplicationCardWidget extends StatelessWidget {
                     ],
                   ),
                 ),
+                if (application.status == AppStatus.rejected &&
+                    (application.rejectionReason ?? '').trim().isNotEmpty)
+                  InkWell(
+                    onTap: () => _showRejectionReason(context),
+                    borderRadius: BorderRadius.circular(999.r),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 6.h),
+                      child: Icon(Icons.info_outline, size: 18.sp, color: Colors.red.shade700),
+                    ),
+                  ),
               ],
             ),
             16.verticalSpace,
@@ -140,8 +156,23 @@ class ApplicationCardWidget extends StatelessWidget {
       case AppStatus.underReview:
         return _StatusMeta('status_pending'.tr, Colors.orange, Icons.access_time);
       case AppStatus.applied:
-        throw UnimplementedError();
+        return _StatusMeta('status_applied'.tr, Colors.grey, Icons.send_rounded);
     }
+  }
+
+  void _showRejectionReason(BuildContext context) {
+    Get.dialog(
+      AlertDialog(
+        title: Text('lbl_rejection_reason'.tr),
+        content: Text(application.rejectionReason ?? ''),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text('btn_cancel'.tr),
+          ),
+        ],
+      ),
+    );
   }
 }
 

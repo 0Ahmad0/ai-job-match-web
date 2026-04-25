@@ -43,6 +43,10 @@ class OnboardingController extends GetxController {
     }
   }
 
+  void skipOnboarding() {
+    _finishOnboarding();
+  }
+
   void _finishOnboarding() {
     // حفظ في التخزين أن المستخدم تخطى البداية
     // Get.find<StorageService>().saveOnboardingSeen();

@@ -175,8 +175,6 @@ class AppUserAvatar extends StatelessWidget {
         .take(2)
         .map((part) => part.substring(0, 1).toUpperCase())
         .join();
-    final normalizedImageUrl = ImageUrlUtil.normalize(imageUrl);
-    final hasImage = normalizedImageUrl.isNotEmpty;
     final diameter = radius.r * 2;
 
     Widget initialsFallback() {
@@ -197,26 +195,36 @@ class AppUserAvatar extends StatelessWidget {
         child: SizedBox(
           width: diameter,
           height: diameter,
-          child: hasImage
-              ? CachedNetworkImage(
-                  imageUrl: normalizedImageUrl,
-                  fit: BoxFit.cover,
-                  placeholder: (_, __) => Container(
-                    color: context.theme.primaryColor.withValues(alpha: 0.08),
-                    child: const Center(
-                      child: SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
+          child: FutureBuilder<String>(
+            future: ImageUrlUtil.resolveForDisplay(imageUrl),
+            builder: (context, snapshot) {
+              final resolvedUrl = snapshot.data ?? '';
+              final hasImage = resolvedUrl.isNotEmpty;
+
+              if (!hasImage) {
+                return initialsFallback();
+              }
+
+              return CachedNetworkImage(
+                imageUrl: resolvedUrl,
+                fit: BoxFit.cover,
+                placeholder: (_, __) => Container(
+                  color: context.theme.primaryColor.withValues(alpha: 0.08),
+                  child: const Center(
+                    child: SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
                     ),
                   ),
-                  errorWidget: (_, __, ___) => Container(
-                    color: context.theme.primaryColor.withValues(alpha: 0.08),
-                    child: initialsFallback(),
-                  ),
-                )
-              : initialsFallback(),
+                ),
+                errorWidget: (_, __, ___) => Container(
+                  color: context.theme.primaryColor.withValues(alpha: 0.08),
+                  child: initialsFallback(),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

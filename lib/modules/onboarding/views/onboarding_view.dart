@@ -17,7 +17,7 @@ class OnboardingView extends GetView<OnboardingController> {
         actions: [
           // زر تخطي بسيط
           TextButton(
-            onPressed: controller.nextPage,
+            onPressed: controller.skipOnboarding,
             child: Text(
               'skip'.tr,
               style: context.textTheme.bodyLarge?.copyWith(

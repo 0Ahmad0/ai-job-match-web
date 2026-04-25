@@ -132,7 +132,7 @@ class SeekerHomeView extends GetView<SeekerHomeController> {
                                 Icon(Icons.search_off, size: 48.sp, color: Colors.grey.shade400),
                                 12.verticalSpace,
                                 Text(
-                                  'msg_no_jobs_available'.tr,
+                                  'jobs_empty_title'.tr,
                                   style: TextStyle(color: Colors.grey.shade600, fontSize: 14.sp),
                                 ),
                               ],

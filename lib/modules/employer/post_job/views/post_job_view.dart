@@ -176,6 +176,61 @@ class PostJobView extends GetView<PostJobController> {
               ),
             ],
           ),
+          20.verticalSpace,
+          Text(
+            'job_required_skills'.tr,
+            style: context.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          10.verticalSpace,
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: controller.skillInputCtrl,
+                  onSubmitted: (_) => controller.addSkillFromInput(),
+                  decoration: InputDecoration(
+                    hintText: 'job_skill_input_hint'.tr,
+                    prefixIcon: const Icon(Icons.psychology_alt_outlined),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                  ),
+                ),
+              ),
+              10.horizontalSpace,
+              ElevatedButton(
+                onPressed: controller.addSkillFromInput,
+                child: Text('btn_add'.tr),
+              ),
+            ],
+          ),
+          10.verticalSpace,
+          Obx(
+            () => Wrap(
+              spacing: 8.w,
+              runSpacing: 8.h,
+              children: controller.requiredSkills
+                  .map(
+                    (skill) => Chip(
+                      label: Text(skill),
+                      onDeleted: () => controller.removeSkill(skill),
+                      deleteIcon: const Icon(Icons.close),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+          6.verticalSpace,
+          Obx(
+            () => Text(
+              'job_skills_count'.trParams({
+                'count': controller.requiredSkills.length.toString(),
+              }),
+              style: TextStyle(color: Colors.grey.shade700, fontSize: 12.sp),
+            ),
+          ),
         ],
       ),
     );
@@ -221,6 +276,37 @@ class PostJobView extends GetView<PostJobController> {
               contentPadding: EdgeInsets.all(20.r),
             ),
           ),
+          14.verticalSpace,
+          Obx(
+            () => controller.aiRequirements.isEmpty
+                ? const SizedBox.shrink()
+                : Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(12.r),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12.r),
+                      color: context.theme.primaryColor.withValues(alpha: 0.08),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'lbl_requirements'.tr,
+                          style: context.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        8.verticalSpace,
+                        ...controller.aiRequirements
+                            .take(6)
+                            .map((req) => Padding(
+                                  padding: EdgeInsets.only(bottom: 6.h),
+                                  child: Text('- $req'),
+                                )),
+                      ],
+                    ),
+                  ),
+          ),
         ],
       ),
     );
@@ -260,4 +346,5 @@ class PostJobView extends GetView<PostJobController> {
     );
   }
 }
+
 

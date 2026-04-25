@@ -1,1 +1,14 @@
-{"flutter":{"platforms":{"dart":{"lib/firebase_options.dart":{"projectId":"ai-job-matcher-88f00","configurations":{"web":"1:14038176626:web:2b9405242071c91c4943eb"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "ai-job-matcher-88f00",
+          "configurations": {
+            "web": "1:14038176626:web:2b9405242071c91c4943eb"
+          }
+        }
+      }
+    }
+  }
+}

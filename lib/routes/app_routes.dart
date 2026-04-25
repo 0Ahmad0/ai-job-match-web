@@ -13,6 +13,7 @@ abstract class Routes {
   static const AUTH_STATUS = '/auth/status';
 
   static const ROOT = '/root';
+  static const HOME = '/home';
 
   static const SEEKER_HOME = '/seeker/home';
   static const CV_ENTRY = '/seeker/cv-entry';

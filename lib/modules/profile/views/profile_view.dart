@@ -42,7 +42,7 @@ class ProfileView extends GetView<ProfileController> {
                       12.verticalSpace,
                       const ProfileHeaderWidget(),
                       28.verticalSpace,
-                      const ProfileStatsWidget(),
+                      const Center(child: ProfileStatsWidget()),
                       28.verticalSpace,
                       _buildSectionHeader(context, 'sec_account'.tr),
                       ProfileMenuTile(

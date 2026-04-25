@@ -1,3 +1,5 @@
+import 'package:firebase_storage/firebase_storage.dart';
+
 class ImageUrlUtil {
   static String normalize(
     String? url, {
@@ -38,5 +40,39 @@ class ImageUrlUtil {
     }
 
     return raw;
+  }
+
+  static bool requiresDownloadUrlResolution(String? url) {
+    final raw = (url ?? '').trim();
+    if (raw.isEmpty) return false;
+    return raw.startsWith('gs://') || raw.startsWith('/');
+  }
+
+  static Future<String> resolveForDisplay(
+    String? url, {
+    String? defaultBucket,
+  }) async {
+    final raw = (url ?? '').trim();
+    if (raw.isEmpty) {
+      return '';
+    }
+
+    if (raw.startsWith('https://') || raw.startsWith('http://')) {
+      return normalize(raw, defaultBucket: defaultBucket);
+    }
+
+    try {
+      if (raw.startsWith('gs://')) {
+        return await FirebaseStorage.instance.refFromURL(raw).getDownloadURL();
+      }
+
+      if (raw.startsWith('/')) {
+        return await FirebaseStorage.instance.ref(raw.substring(1)).getDownloadURL();
+      }
+    } catch (_) {
+      return '';
+    }
+
+    return normalize(raw, defaultBucket: defaultBucket);
   }
 }

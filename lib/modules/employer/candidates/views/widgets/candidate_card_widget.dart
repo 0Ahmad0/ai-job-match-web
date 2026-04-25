@@ -160,7 +160,7 @@ class CandidateCardWidget extends GetView<CandidatesController> {
                   Icons.close,
                   'btn_reject'.tr,
                   Colors.red,
-                  isInterviewScheduled ? () => _showInterviewActionDialog(context, 'action_reject') : () => controller.performAction('action_reject', candidate),
+                  isInterviewScheduled ? () => _showInterviewActionDialog(context, 'action_reject') : () => _showRejectReasonDialog(context),
                 ),
                 _buildActionButton(
                   context,
@@ -169,13 +169,14 @@ class CandidateCardWidget extends GetView<CandidatesController> {
                   Colors.green,
                   isInterviewScheduled ? () => _showInterviewActionDialog(context, 'action_accept') : () => controller.performAction('action_accept', candidate),
                 ),
-                _buildActionButton(
-                  context,
-                  Icons.calendar_month,
-                  'btn_interview'.tr,
-                  context.theme.primaryColor,
-                  () => _showInterviewSchedulingDialog(context),
-                ),
+                if (!isInterviewScheduled)
+                  _buildActionButton(
+                    context,
+                    Icons.calendar_month,
+                    'btn_interview'.tr,
+                    context.theme.primaryColor,
+                    () => _showInterviewSchedulingDialog(context),
+                  ),
               ],
             ),
             ),
@@ -371,12 +372,56 @@ class CandidateCardWidget extends GetView<CandidatesController> {
             ),
             onPressed: () {
               Get.back();
+              if (action == 'action_reject') {
+                _showRejectReasonDialog(context);
+                return;
+              }
               controller.performAction(action, candidate);
             },
             child: Text(
               action == 'action_accept' ? 'btn_approve'.tr : 'btn_reject'.tr,
               style: const TextStyle(color: Colors.white),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showRejectReasonDialog(BuildContext context) {
+    final reasonCtrl = TextEditingController();
+    Get.dialog(
+      AlertDialog(
+        title: Text('btn_reject_reason'.tr),
+        content: TextField(
+          controller: reasonCtrl,
+          minLines: 2,
+          maxLines: 4,
+          decoration: InputDecoration(
+            hintText: 'hint_reject_reason'.tr,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text('btn_cancel'.tr),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () {
+              final reason = reasonCtrl.text.trim();
+              if (reason.isEmpty) {
+                Get.snackbar('err_title'.tr, 'hint_reject_reason'.tr);
+                return;
+              }
+              Get.back();
+              controller.performAction(
+                'action_reject',
+                candidate,
+                rejectionReason: reason,
+              );
+            },
+            child: Text('btn_reject'.tr, style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),

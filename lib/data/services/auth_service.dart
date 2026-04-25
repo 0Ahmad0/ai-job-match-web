@@ -146,7 +146,9 @@ class AuthService extends GetxService {
 
       // Add optional aboutYou field if provided
       if (aboutYou != null && aboutYou.trim().isNotEmpty) {
-        userData['aboutYou'] = aboutYou.trim();
+        final trimmedAbout = aboutYou.trim();
+        userData['aboutYou'] = trimmedAbout;
+        userData['bio'] = trimmedAbout;
       }
 
       await _firestore.collection('users').doc(user.uid).set(userData);

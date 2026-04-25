@@ -37,8 +37,6 @@ class CvBottomControlsWidget extends GetView<CvBuilderController> {
         Row(
           children: [
             _backButton(),
-            const Spacer(),
-            Flexible(child: _saveButton()),
           ],
         ),
         10.verticalSpace,
@@ -52,8 +50,6 @@ class CvBottomControlsWidget extends GetView<CvBuilderController> {
       children: [
         _backButton(),
         const Spacer(),
-        Flexible(child: _saveButton()),
-        12.horizontalSpace,
         _nextButton(false),
       ],
     );
@@ -66,13 +62,6 @@ class CvBottomControlsWidget extends GetView<CvBuilderController> {
     );
   }
 
-  Widget _saveButton() {
-    return TextButton(
-      onPressed: controller.saveDraft,
-      child: Text('cv_save_draft'.tr, overflow: TextOverflow.ellipsis),
-    );
-  }
-
   Widget _nextButton(bool isFullWidth) {
     return Obx(() {
       final isLastStep = controller.currentStep.value == controller.totalSteps - 1;
@@ -80,8 +69,8 @@ class CvBottomControlsWidget extends GetView<CvBuilderController> {
         isFullWidth: isFullWidth,
         width: isFullWidth ? null : 170.w,
         height: 46.h,
-        text: isLastStep ? 'cv_preview_cta'.tr : 'btn_next'.tr,
-        onPressed: isLastStep ? controller.previewPdf : controller.nextStep,
+        text: isLastStep ? 'cv_finish'.tr : 'btn_next'.tr,
+        onPressed: isLastStep ? controller.finalizeCvAndGoHome : controller.nextStep,
       );
     });
   }

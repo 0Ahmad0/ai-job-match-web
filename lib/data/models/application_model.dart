@@ -62,7 +62,7 @@ class ApplicationModel {
       appliedDate: _formatDate(data['created_at']),
       status: _mapStatus(rawStatus),
       currentStage: rawStatus,
-      rejectionReason: data['rejection_reason'] as String?,
+      rejectionReason: (data['rejectionReason'] as String?) ?? (data['rejection_reason'] as String?),
       startDate: data['start_date'] as String?,
       offerSalary: data['offer_salary'] as String?,
       interviewDate: data['interview_date'] as String?,
