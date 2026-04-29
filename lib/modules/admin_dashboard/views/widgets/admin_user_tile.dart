@@ -42,7 +42,10 @@ class AdminUserTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(12.r),
         border: Border(left: BorderSide(color: statusColor, width: 4)),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5),
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 5,
+          ),
         ],
       ),
       child: Row(

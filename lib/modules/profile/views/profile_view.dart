@@ -108,7 +108,7 @@ class ProfileView extends GetView<ProfileController> {
                           icon: Icons.dark_mode_outlined,
                           trailing: Switch(
                             value: controller.isDarkMode,
-                            activeColor: context.theme.primaryColor,
+                            activeThumbColor: context.theme.primaryColor,
                             onChanged: controller.toggleTheme,
                           ),
                           onTap: () => controller.toggleTheme(!controller.isDarkMode),

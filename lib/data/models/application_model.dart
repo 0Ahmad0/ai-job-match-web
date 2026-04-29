@@ -85,7 +85,6 @@ class ApplicationModel {
       case 'rejected':
         return AppStatus.rejected;
       case 'under_review':
-      case 'under_review':
         return AppStatus.underReview;
       case 'applied':
       case 'pending':

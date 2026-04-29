@@ -39,7 +39,7 @@ class AddSkillSheet extends StatelessWidget {
               Obx(
                 () => DropdownButtonFormField<int>(
                   isExpanded: true,
-                  value: controller.selectedSkillLevel.value,
+                  initialValue: controller.selectedSkillLevel.value,
                   items: [1, 2, 3, 4, 5]
                       .map(
                         (level) => DropdownMenuItem<int>(

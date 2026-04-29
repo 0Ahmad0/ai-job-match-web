@@ -65,10 +65,10 @@ class JobsController extends GetxController {
           .collection('applications')
           .where('job_seeker_id', isEqualTo: user.uid)
           .get();
-      appliedJobIds.value = appsSnap.docs
+      appliedJobIds.assignAll(appsSnap.docs
           .map((doc) => (doc.data()['job_id'] as String?) ?? '')
           .where((id) => id.isNotEmpty)
-          .toSet();
+          .toSet());
 
       final extractedSkills = _collectUserSkills(userData);
       _userTargetTitle = _resolveUserTargetTitle(userData);
@@ -76,7 +76,10 @@ class JobsController extends GetxController {
 
       userSkills.assignAll(extractedSkills);
 
-      final hasUploaded = (userData['cv_uploaded'] == true) && userSkills.isNotEmpty;
+      final hasManualCv = _hasUsableManualCv(userData);
+      final hasUploaded =
+          ((userData['cv_uploaded'] == true) || hasManualCv) &&
+          userSkills.isNotEmpty;
       isCvUploaded.value = hasUploaded;
 
       if (!hasUploaded) {
@@ -175,8 +178,65 @@ class JobsController extends GetxController {
     final manualSkills = ((manualCv['skills'] as List?) ?? const [])
         .map((e) => e is Map ? (e['name']?.toString() ?? '') : e.toString())
         .where((e) => e.trim().isNotEmpty);
+    final summarySkills = _extractKeywordSkills(
+      [
+        manualCv['jobTitle']?.toString() ?? '',
+        manualCv['summary']?.toString() ?? '',
+        ...((manualCv['experience'] as List?) ?? const []).map(
+          (e) => e is Map ? (e['description']?.toString() ?? '') : '',
+        ),
+      ].join(' '),
+    );
 
-    return <String>{...aiSkills, ...manualSkills}.toList();
+    return <String>{...aiSkills, ...manualSkills, ...summarySkills}.toList();
+  }
+
+  bool _hasUsableManualCv(Map<String, dynamic> userData) {
+    final manualCv =
+        (userData['manual_cv'] as Map<String, dynamic>?) ??
+        const <String, dynamic>{};
+    final hasName = (manualCv['fullName'] as String?)?.trim().isNotEmpty == true;
+    final hasSummary =
+        (manualCv['summary'] as String?)?.trim().isNotEmpty == true;
+    final hasSkills = ((manualCv['skills'] as List?) ?? const []).isNotEmpty;
+    return hasName || hasSummary || hasSkills;
+  }
+
+  List<String> _extractKeywordSkills(String text) {
+    final normalized = text.toLowerCase();
+    const knownSkills = [
+      'flutter',
+      'dart',
+      'firebase',
+      'javascript',
+      'typescript',
+      'react',
+      'vue',
+      'angular',
+      'nodejs',
+      'node.js',
+      'python',
+      'java',
+      'kotlin',
+      'swift',
+      'php',
+      'laravel',
+      'sql',
+      'mysql',
+      'postgresql',
+      'mongodb',
+      'html',
+      'css',
+      'figma',
+      'ui/ux',
+      'git',
+      'docker',
+      'aws',
+      'api',
+      'rest',
+      'machine learning',
+    ];
+    return knownSkills.where(normalized.contains).toList();
   }
 
   String _resolveUserTargetTitle(Map<String, dynamic> userData) {

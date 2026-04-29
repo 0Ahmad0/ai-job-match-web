@@ -16,6 +16,7 @@ class AuthStatusView extends StatelessWidget {
     final titleKey = (args['titleKey'] as String?) ?? 'status_pending_title';
     final messageKey =
         (args['messageKey'] as String?) ?? 'status_pending_message';
+    final showRefresh = (args['showRefresh'] as bool?) ?? true;
 
     return Scaffold(
       appBar: AppBar(
@@ -128,22 +129,24 @@ class AuthStatusView extends StatelessWidget {
                         ),
                       ),
                       28.verticalSpace,
-                      CustomButton(
-                        text: 'btn_refresh_status'.tr,
-                        onPressed: () async {
-                          await authController.refreshCurrentUser();
-                          final destination =
-                              await authController.resolveSessionDestination();
-                          if (destination == null) {
-                            return;
-                          }
-                          Get.offAllNamed(
-                            destination['route'] as String,
-                            arguments: destination['arguments'],
-                          );
-                        },
-                      ),
-                      14.verticalSpace,
+                      if (showRefresh) ...[
+                        CustomButton(
+                          text: 'btn_refresh_status'.tr,
+                          onPressed: () async {
+                            await authController.refreshCurrentUser();
+                            final destination =
+                                await authController.resolveSessionDestination();
+                            if (destination == null) {
+                              return;
+                            }
+                            Get.offAllNamed(
+                              destination['route'] as String,
+                              arguments: destination['arguments'],
+                            );
+                          },
+                        ),
+                        14.verticalSpace,
+                      ],
                       SizedBox(
                         width: double.infinity,
                         child: OutlinedButton.icon(

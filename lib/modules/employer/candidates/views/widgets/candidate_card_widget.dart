@@ -25,7 +25,6 @@ class CandidateCardWidget extends GetView<CandidatesController> {
       // Determine action button states based on candidate status
       final isTerminal = candidate.status == 'accepted' || candidate.status == 'rejected';
       final isAccepted = candidate.status == 'accepted';
-      final isRejected = candidate.status == 'rejected';
       final isInterviewScheduled = candidate.status == 'interview_scheduled';
 
       return Container(

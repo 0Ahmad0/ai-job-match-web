@@ -13,9 +13,6 @@ class PostJobView extends GetView<PostJobController> {
 
   @override
   Widget build(BuildContext context) {
-    // الحقن (يمكن نقله للـ Binding)
-    
-
     return Scaffold(
       appBar: AppBar(title: Text('lbl_post_job'.tr), centerTitle: true),
       body: Padding(
@@ -243,22 +240,27 @@ class PostJobView extends GetView<PostJobController> {
       child: Column(
         children: [
           // AI Button
-          Align(
-            alignment: AlignmentDirectional.centerEnd,
-            child: TextButton.icon(
-              onPressed: controller.isAiWriting.value
-                  ? null
-                  : controller.autoWriteDescription,
-              icon: controller.isAiWriting.value
-                  ? SizedBox(
-                      width: 15.w,
-                      height: 15.w,
-                      child: const CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.auto_awesome),
-              label: Text('lbl_ai_write'.tr),
-              style: TextButton.styleFrom(foregroundColor: Colors.purple),
-            ),
+          Obx(
+            () {
+              final isAiWriting = controller.isAiWriting.value;
+              return Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: TextButton.icon(
+                  onPressed:
+                      isAiWriting ? null : controller.autoWriteDescription,
+                  icon: isAiWriting
+                      ? SizedBox(
+                          width: 15.w,
+                          height: 15.w,
+                          child:
+                              const CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.auto_awesome),
+                  label: Text('lbl_ai_write'.tr),
+                  style: TextButton.styleFrom(foregroundColor: Colors.purple),
+                ),
+              );
+            },
           ),
 
           TextField(

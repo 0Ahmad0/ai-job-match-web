@@ -25,6 +25,7 @@ class CvBuilderController extends GetxController {
   final detectedCvLanguage = 'en'.obs;
   final generatedPdfBytes = Rxn<Uint8List>();
   final generatedPdfFileName = 'My_Professional_CV.pdf'.obs;
+  final summaryTextDirection = TextDirection.ltr.obs;
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -125,6 +126,7 @@ class CvBuilderController extends GetxController {
     aiSuggestions.clear();
     atsScore.value = 0;
     detectedCvLanguage.value = 'en';
+    summaryTextDirection.value = TextDirection.ltr;
     selectedTemplate.value = 1;
     currentStep.value = 0;
   }
@@ -136,6 +138,9 @@ class CvBuilderController extends GetxController {
     addressCtrl.text = (manualCv['address'] as String?) ?? (userData['address'] as String?) ?? '';
     linkedinCtrl.text = (manualCv['linkedin'] as String?) ?? (userData['linkedin'] as String?) ?? '';
     summaryCtrl.text = (manualCv['summary'] as String?) ?? (userData['bio'] as String?) ?? '';
+    summaryTextDirection.value = _containsArabic(summaryCtrl.text)
+        ? TextDirection.rtl
+        : TextDirection.ltr;
 
     experiences.assignAll(_mapExperiences((manualCv['experience'] as List?) ?? const []));
     educations.assignAll(_mapEducations((manualCv['education'] as List?) ?? const []));
@@ -221,6 +226,12 @@ class CvBuilderController extends GetxController {
   }
 
   void selectTemplate(int index) => selectedTemplate.value = index;
+  void toggleSummaryTextDirection() {
+    summaryTextDirection.value = summaryTextDirection.value == TextDirection.rtl
+        ? TextDirection.ltr
+        : TextDirection.rtl;
+  }
+
   void jumpToStep(int step) {
     if (step < 0 || step >= totalSteps) return;
     currentStep.value = step;
@@ -358,8 +369,10 @@ class CvBuilderController extends GetxController {
 
     try {
       isSaving.value = true;
-      await saveDraft();
-      final languageCode = (Get.locale?.languageCode ?? detectedCvLanguage.value).toLowerCase();
+      await saveDraft(showFeedback: false);
+      final languageCode = _containsArabicContentForPreview()
+          ? 'ar'
+          : detectedCvLanguage.value.toLowerCase();
       final fileName = _buildPdfFileName(cvData.fullName);
       final bytes = await PdfService().generateCVBytes(
         cvData,
@@ -571,6 +584,27 @@ class CvBuilderController extends GetxController {
       'suggestions': aiSuggestions.toList(),
       'creationMethod': 'Manual_Creation',
     };
+  }
+
+  bool _containsArabicContentForPreview() {
+    return _containsArabic(
+      [
+        nameCtrl.text,
+        jobTitleCtrl.text,
+        summaryCtrl.text,
+        addressCtrl.text,
+        ...experiences.map((e) => '${e.jobTitle} ${e.company} ${e.description}'),
+        ...educations.map((e) => '${e.school} ${e.degree}'),
+        ...skillsList.map((e) => e.name),
+        ...projects.map((e) => '${e.name} ${e.description}'),
+      ].join(' '),
+    );
+  }
+
+  bool _containsArabic(String value) {
+    return RegExp(
+      r'[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]',
+    ).hasMatch(value);
   }
 
   List<CvExperience> _mapExperiences(List raw) => raw

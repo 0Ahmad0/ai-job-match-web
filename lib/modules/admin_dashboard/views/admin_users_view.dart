@@ -33,28 +33,37 @@ class AdminUsersView extends GetView<AdminDashboardController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('lbl_admin_users'.tr), centerTitle: true),
-      body: Obx(
-        () => Stack(
+      body: Obx(() {
+        final isUsersLoading = controller.isUsersLoading.value;
+        final isActionLoading = controller.isActionLoading.value;
+        final users = controller.usersList.toList(growable: false);
+
+        return Stack(
           children: [
-            if (controller.isUsersLoading.value)
+            if (isUsersLoading)
               const UserListShimmer()
-            else if (controller.usersList.isEmpty)
+            else if (users.isEmpty)
               Center(
                 child: Padding(
                   padding: EdgeInsets.all(24.r),
-                  child: Text('admin_users_empty'.tr, textAlign: TextAlign.center),
+                  child: Text(
+                    'admin_users_empty'.tr,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               )
             else
               ListView.builder(
                 padding: EdgeInsets.all(20.r),
-                itemCount: controller.usersList.length,
+                itemCount: users.length,
                 itemBuilder: (context, index) {
-                  final user = controller.usersList[index];
-                  final status = (user['status'] as String? ?? '').toLowerCase();
+                  final user = users[index];
+                  final status =
+                      (user['status'] as String? ?? '').toLowerCase();
                   final role = (user['role'] as String? ?? '').toLowerCase();
                   final isBlocked = status == 'blocked';
-                  final isPendingCompany = role == 'company' && status == 'pending';
+                  final isPendingCompany =
+                      role == 'company' && status == 'pending';
 
                   return Card(
                     margin: EdgeInsets.only(bottom: 10.h),
@@ -76,11 +85,16 @@ class AdminUsersView extends GetView<AdminDashboardController> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text('${_localizedUserType(role)} - ${_localizedStatus(status)}'),
+                          Text(
+                            '${_localizedUserType(role)} - ${_localizedStatus(status)}',
+                          ),
                           if ((user['email'] as String?)?.isNotEmpty == true)
                             Text(
                               user['email'] as String,
-                              style: TextStyle(fontSize: 12.sp, color: Colors.grey),
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                color: Colors.grey,
+                              ),
                             ),
                         ],
                       ),
@@ -89,39 +103,54 @@ class AdminUsersView extends GetView<AdminDashboardController> {
                         children: [
                           if (isPendingCompany)
                             IconButton(
-                              icon: const Icon(Icons.check, color: Colors.green),
+                              icon:
+                                  const Icon(Icons.check, color: Colors.green),
                               tooltip: 'btn_approve'.tr,
-                              onPressed: controller.isActionLoading.value
+                              onPressed: isActionLoading
                                   ? null
-                                  : () => controller.approveCompany(user['id'] as String),
+                                  : () => controller.approveCompany(
+                                        user['id'] as String,
+                                      ),
                             ),
                           if (isPendingCompany)
                             IconButton(
-                              icon: const Icon(Icons.close, color: Colors.orange),
+                              icon:
+                                  const Icon(Icons.close, color: Colors.orange),
                               tooltip: 'btn_reject'.tr,
-                              onPressed: controller.isActionLoading.value
+                              onPressed: isActionLoading
                                   ? null
-                                  : () => controller.rejectCompany(user['id'] as String),
+                                  : () => controller.rejectCompany(
+                                        user['id'] as String,
+                                      ),
                             ),
                           IconButton(
                             icon: Icon(
                               isBlocked ? Icons.lock_open : Icons.block,
                               color: isBlocked ? Colors.green : Colors.red,
                             ),
-                            tooltip: isBlocked ? 'btn_unblock_user'.tr : 'btn_block_user'.tr,
-                            onPressed: controller.isActionLoading.value
+                            tooltip: isBlocked
+                                ? 'btn_unblock_user'.tr
+                                : 'btn_block_user'.tr,
+                            onPressed: isActionLoading
                                 ? null
                                 : () => isBlocked
-                                    ? controller.unblockUser(user['id'] as String)
-                                    : controller.blockUser(user['id'] as String),
+                                    ? controller.unblockUser(
+                                        user['id'] as String,
+                                      )
+                                    : controller.blockUser(
+                                        user['id'] as String,
+                                      ),
                           ),
                         ],
                       ),
                     ),
-                  ).animate().fade(duration: 300.ms).slideY(begin: 0.08, end: 0);
+                  )
+                      .animate()
+                      .fade(duration: 300.ms)
+                      .slideY(begin: 0.08, end: 0);
                 },
               ),
-            if (controller.isActionLoading.value)
+            if (isActionLoading)
               Positioned.fill(
                 child: Container(
                   color: Colors.black.withValues(alpha: 0.12),
@@ -134,8 +163,8 @@ class AdminUsersView extends GetView<AdminDashboardController> {
                 ),
               ),
           ],
-        ),
-      ),
+        );
+      }),
     );
   }
 }

@@ -43,10 +43,10 @@ class CvBuilderView extends GetView<CvBuilderController> {
                     child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
                   ),
                 )
-              : IconButton(
+              : TextButton.icon(
                   onPressed: controller.optimizeWithAi,
                   icon: const Icon(Icons.auto_awesome),
-                  tooltip: 'btn_optimize_ai'.tr,
+                  label: Text('btn_optimize_ai_short'.tr),
                 )),
           const SizedBox(width: 8),
         ],

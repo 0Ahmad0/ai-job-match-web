@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../../core/common/shimmer_skeletons.dart';
+import '../../../../routes/app_routes.dart';
 import '../controllers/candidates_controller.dart';
 import 'widgets/candidate_card_widget.dart';
 
@@ -18,8 +19,9 @@ class CandidatesView extends GetView<CandidatesController> {
         centerTitle: true,
         actions: [
           IconButton(
-            onPressed: controller.fetchApplicants,
-            icon: const Icon(Icons.refresh),
+            tooltip: 'lbl_post_job'.tr,
+            onPressed: () => Get.toNamed(Routes.COMPANY_POST_JOB),
+            icon: const Icon(Icons.add),
           ),
         ],
       ),

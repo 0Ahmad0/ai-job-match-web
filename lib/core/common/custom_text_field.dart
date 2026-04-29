@@ -16,6 +16,10 @@ class CustomTextField extends StatelessWidget {
     this.keyboardType,
     this.maxLines = 1,
     this.onChanged,
+    this.textDirection,
+    this.textAlign,
+    this.suffixIcon,
+    this.suffixTooltip,
   });
 
   final String label;
@@ -29,6 +33,10 @@ class CustomTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final int maxLines;
   final ValueChanged<String>? onChanged;
+  final TextDirection? textDirection;
+  final TextAlign? textAlign;
+  final IconData? suffixIcon;
+  final String? suffixTooltip;
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +55,8 @@ class CustomTextField extends StatelessWidget {
           obscureText: obscureText ?? false,
           keyboardType: keyboardType,
           onChanged: onChanged,
+          textDirection: textDirection,
+          textAlign: textAlign ?? TextAlign.start,
           style: context.textTheme.bodyLarge,
           decoration: InputDecoration(
             hintText: hint,
@@ -59,6 +69,12 @@ class CustomTextField extends StatelessWidget {
                     ),
                     onPressed: onSuffixPressed,
                   )
+                : suffixIcon != null
+                    ? IconButton(
+                        tooltip: suffixTooltip,
+                        icon: Icon(suffixIcon, size: 20.sp),
+                        onPressed: onSuffixPressed,
+                      )
                 : null,
           ),
         ),

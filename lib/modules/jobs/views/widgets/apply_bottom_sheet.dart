@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import '../../../../core/common/custom_button.dart';
 import '../../../../data/models/job_model.dart';
 import '../../../../data/services/notification_service.dart';
+import '../../../../routes/app_routes.dart';
 import '../../controllers/jobs_controller.dart';
 
 class ApplyBottomSheet extends StatelessWidget {
@@ -148,14 +149,19 @@ class ApplyBottomSheet extends StatelessWidget {
         Get.find<JobsController>().markJobAsApplied(job.id);
       }
       Get.back(result: true);
-      Get.snackbar(
-        'success_title'.tr,
-        'msg_app_sent'.tr,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(20),
-        icon: const Icon(Icons.check_circle, color: Colors.white),
+      Get.defaultDialog(
+        title: 'success_title'.tr,
+        middleText: 'msg_app_sent'.tr,
+        textConfirm: 'go_home'.tr,
+        textCancel: 'nav_jobs'.tr,
+        confirmTextColor: Colors.white,
+        buttonColor: Colors.green,
+        onConfirm: () {
+          Get.offAllNamed(
+            Routes.HOME,
+            arguments: {'role': 'jobSeeker', 'index': 0},
+          );
+        },
       );
     } catch (e) {
       Get.snackbar('err_title'.tr, 'err_application_submit_failed'.trParams({'error': e.toString()}));

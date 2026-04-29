@@ -205,7 +205,7 @@ class ProfileController extends GetxController {
       final aboutYou = editBioCtrl.text.trim();
       final payload = <String, dynamic>{
         'updatedAt': FieldValue.serverTimestamp(),
-        'profile_image_url': uploadedAvatarUrl ?? '',
+        'profile_image_url': uploadedAvatarUrl,
         'headline': editJobCtrl.text.trim(),
         'bio': aboutYou,
         'aboutYou': aboutYou,

@@ -520,7 +520,7 @@ class PdfService {
     required _PdfLabels labels,
   }) {
     final levels = labels.levels;
-    final safeIndex = (level.clamp(1, 5) as int) - 1;
+    final safeIndex = level.clamp(1, 5) - 1;
     final levelText = levels[safeIndex];
 
     return pw.Container(

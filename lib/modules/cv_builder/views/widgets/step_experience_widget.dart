@@ -26,7 +26,7 @@ class StepExperienceWidget extends GetView<CvBuilderController> {
                 AppStateCard(
                   icon: Icons.work_history_outlined,
                   title: 'cv_fix_focus_title'.tr,
-                  message: 'experience_hint'.tr, // or use a dedicated key if exists, fallback to a sensible one
+                  message: 'experience_hint'.tr,
                 ),
                 14.verticalSpace,
               ],

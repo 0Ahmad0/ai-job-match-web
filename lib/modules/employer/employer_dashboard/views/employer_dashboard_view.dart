@@ -6,6 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../../core/common/app_ui.dart';
 import '../../../../core/common/shimmer_skeletons.dart';
+import '../../../../routes/app_routes.dart';
 import '../controllers/employer_dashboard_controller.dart';
 import 'widgets/emp_stat_card.dart';
 import 'widgets/applicant_tile_widget.dart';
@@ -21,19 +22,28 @@ class EmployerDashboardView extends GetView<EmployerDashboardController> {
         centerTitle: false,
         actions: [
           IconButton(
-            onPressed: controller.loadDashboardData,
-            icon: const Icon(Icons.refresh),
+            tooltip: 'lbl_post_job'.tr,
+            onPressed: () => Get.toNamed(Routes.COMPANY_POST_JOB),
+            icon: const Icon(Icons.add),
           ),
         ],
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(20.r),
-        child: Obx(
-          () => Column(
+        child: Obx(() {
+          final isLoading = controller.isLoading.value;
+          final activeJobsCount = controller.activeJobsCount.value;
+          final newCandidatesCount = controller.newCandidatesCount.value;
+          final shortlistedCount = controller.shortlistedCount.value;
+          final interviewsCount = controller.interviewsCount.value;
+          final recentApplicants =
+              controller.recentApplicants.toList(growable: false);
+
+          return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (controller.isLoading.value) const CardListShimmer(itemCount: 2),
-              if (!controller.isLoading.value)
+              if (isLoading) const CardListShimmer(itemCount: 2),
+              if (!isLoading)
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final crossAxisCount = constraints.maxWidth < 700 ? 2 : 4;
@@ -49,7 +59,7 @@ class EmployerDashboardView extends GetView<EmployerDashboardController> {
                           delay: const Duration(milliseconds: 100),
                           child: EmpStatCard(
                             title: 'stat_active_jobs'.tr,
-                            count: controller.activeJobsCount.toString(),
+                            count: activeJobsCount.toString(),
                             icon: FontAwesomeIcons.briefcase,
                             color: Colors.blue,
                           ),
@@ -58,7 +68,7 @@ class EmployerDashboardView extends GetView<EmployerDashboardController> {
                           delay: const Duration(milliseconds: 200),
                           child: EmpStatCard(
                             title: 'stat_new_candidates'.tr,
-                            count: controller.newCandidatesCount.toString(),
+                            count: newCandidatesCount.toString(),
                             icon: FontAwesomeIcons.users,
                             color: Colors.orange,
                           ),
@@ -67,7 +77,7 @@ class EmployerDashboardView extends GetView<EmployerDashboardController> {
                           delay: const Duration(milliseconds: 300),
                           child: EmpStatCard(
                             title: 'stat_shortlisted'.tr,
-                            count: controller.shortlistedCount.toString(),
+                            count: shortlistedCount.toString(),
                             icon: FontAwesomeIcons.heart,
                             color: Colors.red,
                           ),
@@ -76,7 +86,7 @@ class EmployerDashboardView extends GetView<EmployerDashboardController> {
                           delay: const Duration(milliseconds: 400),
                           child: EmpStatCard(
                             title: 'stat_interviews_scheduled'.tr,
-                            count: controller.interviewsCount.toString(),
+                            count: interviewsCount.toString(),
                             icon: FontAwesomeIcons.calendarCheck,
                             color: Colors.green,
                           ),
@@ -97,15 +107,15 @@ class EmployerDashboardView extends GetView<EmployerDashboardController> {
                 ),
               ),
               15.verticalSpace,
-              if (!controller.isLoading.value && controller.recentApplicants.isEmpty)
+              if (!isLoading && recentApplicants.isEmpty)
                 AppStateCard(
                   icon: Icons.group_outlined,
                   title: 'lbl_recent_applicants'.tr,
                   message: 'msg_no_applicants'.tr,
                 ),
-              if (!controller.isLoading.value)
+              if (!isLoading)
                 Column(
-                  children: controller.recentApplicants.map((app) {
+                  children: recentApplicants.map((app) {
                     return FadeInUp(
                       child: ApplicantTileWidget(
                         name: (app['name'] as String?) ?? '',
@@ -117,8 +127,8 @@ class EmployerDashboardView extends GetView<EmployerDashboardController> {
                   }).toList(),
                 ),
             ],
-          ),
-        ),
+          );
+        }),
       ),
     );
   }

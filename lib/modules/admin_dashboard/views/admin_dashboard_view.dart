@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 
+import '../../../core/localization/localization_controller.dart';
 import '../controllers/admin_dashboard_controller.dart';
 import 'widgets/admin_stat_card.dart';
 
@@ -18,11 +19,17 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
           'admin_dash_title'.tr,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.redAccent.withOpacity(0.1),
+        backgroundColor: Colors.redAccent.withValues(alpha: 0.1),
         actions: [
           IconButton(
-            onPressed: controller.loadPendingData,
-            icon: const Icon(Icons.refresh),
+            tooltip: 'language'.tr,
+            onPressed: () {
+              final localization = Get.find<LocalizationController>();
+              final currentLang =
+                  Get.locale?.languageCode ?? localization.initialLocale.languageCode;
+              localization.changeLanguage(currentLang == 'ar' ? 'en' : 'ar');
+            },
+            icon: const Icon(Icons.language),
           ),
         ],
       ),
@@ -36,10 +43,16 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
               style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
             ),
             15.verticalSpace,
-            Obx(
-              () => LayoutBuilder(
-                builder: (context, constraints) {
-                  final crossAxisCount = constraints.maxWidth < 700 ? 2 : 4;
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final crossAxisCount = constraints.maxWidth < 700 ? 2 : 4;
+                return Obx(() {
+                  final totalUsers = controller.totalUsersCount.value;
+                  final pendingCompanies =
+                      controller.pendingCompaniesCount.value;
+                  final pendingJobs = controller.pendingJobsCount.value;
+                  final approvedJobs = controller.approvedJobsCount.value;
+
                   return GridView.count(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
@@ -52,7 +65,7 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
                         delay: const Duration(milliseconds: 100),
                         child: AdminStatCard(
                           title: 'lbl_total_users'.tr,
-                          value: controller.totalUsersCount.value.toString(),
+                          value: totalUsers.toString(),
                           icon: FontAwesomeIcons.users,
                           color: Colors.blue,
                         ),
@@ -61,7 +74,7 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
                         delay: const Duration(milliseconds: 200),
                         child: AdminStatCard(
                           title: 'lbl_pending_companies'.tr,
-                          value: controller.pendingCompaniesCount.value.toString(),
+                          value: pendingCompanies.toString(),
                           icon: FontAwesomeIcons.hourglassHalf,
                           color: Colors.orange,
                         ),
@@ -70,7 +83,7 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
                         delay: const Duration(milliseconds: 300),
                         child: AdminStatCard(
                           title: 'lbl_admin_jobs'.tr,
-                          value: controller.pendingJobsCount.value.toString(),
+                          value: pendingJobs.toString(),
                           icon: FontAwesomeIcons.briefcase,
                           color: Colors.purple,
                         ),
@@ -79,15 +92,15 @@ class AdminDashboardView extends GetView<AdminDashboardController> {
                         delay: const Duration(milliseconds: 400),
                         child: AdminStatCard(
                           title: 'profile_stat_active_jobs'.tr,
-                          value: controller.approvedJobsCount.value.toString(),
+                          value: approvedJobs.toString(),
                           icon: FontAwesomeIcons.moneyBillWave,
                           color: Colors.green,
                         ),
                       ),
                     ],
                   );
-                },
-              ),
+                });
+              },
             ),
           ],
         ),

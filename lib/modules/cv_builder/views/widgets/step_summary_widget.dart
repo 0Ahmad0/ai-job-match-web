@@ -68,12 +68,23 @@ class StepSummaryWidget extends GetView<CvBuilderController> {
               controller: controller.jobTitleCtrl,
             ),
             18.verticalSpace,
-            CustomTextField(
-              label: 'lbl_summary'.tr,
-              hint: 'hint_summary'.tr,
-              prefixIcon: Icons.notes_outlined,
-              controller: controller.summaryCtrl,
-              maxLines: 8,
+            Obx(
+              () => CustomTextField(
+                label: 'lbl_summary'.tr,
+                hint: 'hint_summary'.tr,
+                prefixIcon: Icons.notes_outlined,
+                controller: controller.summaryCtrl,
+                maxLines: 8,
+                textDirection: controller.summaryTextDirection.value,
+                textAlign: controller.summaryTextDirection.value == TextDirection.rtl
+                    ? TextAlign.right
+                    : TextAlign.left,
+                suffixIcon: controller.summaryTextDirection.value == TextDirection.rtl
+                    ? Icons.format_textdirection_l_to_r
+                    : Icons.format_textdirection_r_to_l,
+                suffixTooltip: 'toggle_text_direction'.tr,
+                onSuffixPressed: controller.toggleSummaryTextDirection,
+              ),
             ),
           ],
         ),

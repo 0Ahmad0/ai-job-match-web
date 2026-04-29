@@ -214,6 +214,10 @@ const Map<String, String> arSaTranslations = {
   'admin_users_empty': 'لا يوجد مستخدمون أو شركات حاليًا.',
   'btn_block_user': 'حظر الحساب',
   'btn_unblock_user': 'فك الحظر',
+  'language': 'اللغة',
+  'account_blocked_title': 'الحساب محظور',
+  'account_blocked_message':
+      'تم حظر هذا الحساب من قبل الإدارة. تواصل مع الدعم إذا كنت تعتقد أن هذا خطأ.',
   'status_approved_user': 'معتمد',
   'btn_add': 'إضافة',
   'job_required_skills': 'المهارات المطلوبة',
@@ -327,6 +331,11 @@ const Map<String, String> arSaTranslations = {
   'lbl_hours_ago': 'منذ @hours ساعة',
   'lbl_days_ago': 'منذ @days يوم',
   'btn_optimize_ai': 'تحسين ذكي (AI)',
+  'btn_optimize_ai_short': 'تحسين',
+  'toggle_text_direction': 'تبديل اتجاه النص',
+  'experience_hint':
+      'أضف المسميات الوظيفية والشركات والتواريخ والإنجازات القابلة للقياس. ركز على النتائج والأدوات المستخدمة.',
+  'go_home': 'القائمة الرئيسية',
   'lbl_ai_suggestions': 'نصائح المدرب الذكي',
   'msg_ai_optimization_complete': 'اكتمل التحليل! نتيجة توافق ATS هي @score%',
   'cv_builder_title': 'منشئ السيرة الذاتية الاحترافي',

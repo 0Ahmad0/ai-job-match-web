@@ -39,7 +39,7 @@ class NotificationsController extends GetxController {
         .listen((snapshot) {
       try {
         final items = snapshot.docs.map((doc) {
-          return NotificationModel.fromFirestore(doc.id, doc.data() as Map<String, dynamic>);
+          return NotificationModel.fromFirestore(doc.id, doc.data());
         }).toList();
 
         notifications.assignAll(items);

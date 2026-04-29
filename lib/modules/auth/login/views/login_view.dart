@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../../auth_controller.dart';
+import '../../../../core/localization/localization_controller.dart';
 import '../controllers/login_controller.dart';
 import 'widgets/login_header_widget.dart';
 import 'widgets/login_form_widget.dart';
@@ -13,8 +13,6 @@ class LoginView extends GetView<LoginController> {
 
   @override
   Widget build(BuildContext context) {
-    final authController = Get.find<AuthController>();
-
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -22,26 +20,27 @@ class LoginView extends GetView<LoginController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: IconButton(
+                  tooltip: 'language'.tr,
+                  onPressed: () {
+                    final localization = Get.find<LocalizationController>();
+                    final currentLang = Get.locale?.languageCode ??
+                        localization.initialLocale.languageCode;
+                    localization.changeLanguage(
+                      currentLang == 'ar' ? 'en' : 'ar',
+                    );
+                  },
+                  icon: const Icon(Icons.language),
+                ),
+              ),
               30.verticalSpace,
               const LoginHeaderWidget(),
               40.verticalSpace,
               const LoginFormWidget(),
               40.verticalSpace,
               const LoginFooterWidget(),
-              24.verticalSpace,
-              // TEMP_ADMIN_SEED_START (safe to delete after one-time use)
-              Obx(
-                () => SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: authController.isLoading.value
-                        ? null
-                        : authController.seedAdminAccount,
-                    child: Text('seed_admin_btn'.tr),
-                  ),
-                ),
-              ),
-              // TEMP_ADMIN_SEED_END
             ],
           ),
         ),

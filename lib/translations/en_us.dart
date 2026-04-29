@@ -227,6 +227,10 @@ const Map<String, String> enUsTranslations = {
   'admin_users_empty': 'No users or companies found.',
   'btn_block_user': 'Block User',
   'btn_unblock_user': 'Unblock User',
+  'language': 'Language',
+  'account_blocked_title': 'Account Blocked',
+  'account_blocked_message':
+      'This account has been blocked by the administrator. Contact support if you think this is a mistake.',
   'status_approved_user': 'Approved',
   'btn_add': 'Add',
   'job_required_skills': 'Required Skills',
@@ -346,6 +350,11 @@ const Map<String, String> enUsTranslations = {
   'lbl_hours_ago': '@hours hours ago',
   'lbl_days_ago': '@days days ago',
   'btn_optimize_ai': 'AI-Powered Optimization',
+  'btn_optimize_ai_short': 'Optimize',
+  'toggle_text_direction': 'Toggle text direction',
+  'experience_hint':
+      'Add your roles, companies, dates, and measurable achievements. Focus on outcomes and tools used.',
+  'go_home': 'Main Menu',
   'lbl_ai_suggestions': 'AI Coaching Tips',
   'msg_ai_optimization_complete': 'Analysis Complete! Your ATS Score is @score%',
   'cv_builder_title': 'Professional CV Builder',
