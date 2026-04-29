@@ -169,18 +169,34 @@ class _SupportViewState extends State<SupportView> {
     );
   }
 
+  Stream<QuerySnapshot<Map<String, dynamic>>>? _cachedStream;
+  String? _cachedUserId;
+  bool? _cachedIsAdmin;
+
   Stream<QuerySnapshot<Map<String, dynamic>>>? _ticketsStream(User? user) {
+    if (user == null) return null;
+    if (_cachedStream != null && _cachedUserId == user.uid && _cachedIsAdmin == _isAdmin) {
+      return _cachedStream;
+    }
+
+    _cachedUserId = user.uid;
+    _cachedIsAdmin = _isAdmin;
+
     if (_isAdmin) {
-      return _firestore.collection('support_tickets').orderBy('updatedAt', descending: true).snapshots();
+      _cachedStream = _firestore
+          .collection('support_tickets')
+          .orderBy('updatedAt', descending: true)
+          .snapshots();
+    } else {
+      // For users, we use a simple query. 
+      // We'll keep it simple to avoid index requirements unless absolutely needed, 
+      // but we ensure the client-side sort handles the order.
+      _cachedStream = _firestore
+          .collection('support_tickets')
+          .where('userId', isEqualTo: user.uid)
+          .snapshots();
     }
-    if (user == null) {
-      return null;
-    }
-    return _firestore
-        .collection('support_tickets')
-        .where('userId', isEqualTo: user.uid)
-        .orderBy('updatedAt', descending: true)
-        .snapshots();
+    return _cachedStream;
   }
 
   @override
@@ -224,7 +240,23 @@ class _SupportViewState extends State<SupportView> {
                             return const Center(child: CircularProgressIndicator());
                           }
 
-                          final docs = snapshot.data?.docs ?? const [];
+                          if (snapshot.hasError) {
+                            return AppStateCard(
+                              icon: Icons.error_outline,
+                              title: 'err_title'.tr,
+                              message: snapshot.error.toString(),
+                            );
+                          }
+
+                          final docs = [...(snapshot.data?.docs ?? const [])]
+                            ..sort((a, b) {
+                              final aTime = _ticketSortTime(a.data());
+                              final bTime = _ticketSortTime(b.data());
+                              if (aTime == null && bTime == null) return 0;
+                              if (aTime == null) return 1;
+                              if (bTime == null) return -1;
+                              return bTime.compareTo(aTime);
+                            });
                           if (docs.isEmpty) {
                             return AppStateCard(
                               icon: Icons.mark_email_unread_outlined,
@@ -419,6 +451,11 @@ class _SupportViewState extends State<SupportView> {
           Icons.hourglass_top_outlined,
         );
     }
+  }
+
+  DateTime? _ticketSortTime(Map<String, dynamic> data) {
+    return ((data['updatedAt'] as Timestamp?) ?? (data['createdAt'] as Timestamp?))
+        ?.toDate();
   }
 }
 

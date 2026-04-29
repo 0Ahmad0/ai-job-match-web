@@ -41,7 +41,14 @@ class PostJobController extends GetxController {
         Get.snackbar('err_title'.tr, 'err_fill_basic_details'.tr);
         return;
       }
-      if (requiredSkills.length < 3) {
+      addSkillFromInput();
+      if (requiredSkills.isEmpty) {
+        final inferredSkills = _extractRequiredSkills(
+          '${titleCtrl.text.trim()} ${descriptionCtrl.text.trim()}',
+        );
+        requiredSkills.assignAll(inferredSkills.take(5));
+      }
+      if (requiredSkills.isEmpty) {
         Get.snackbar('err_title'.tr, 'job_skills_min_error'.tr);
         return;
       }
@@ -157,7 +164,12 @@ class PostJobController extends GetxController {
           'unknown_company'.tr;
 
       final extractedFromDescription = _extractRequiredSkills(descriptionCtrl.text);
-      final mergedSkills = <String>{...requiredSkills, ...extractedFromDescription}.toList();
+      final extractedFromTitle = _extractRequiredSkills(titleCtrl.text);
+      final mergedSkills = <String>{
+        ...requiredSkills,
+        ...extractedFromTitle,
+        ...extractedFromDescription,
+      }.toList();
       final requirementsToSave = aiRequirements.isNotEmpty
           ? aiRequirements.toList()
           : _extractRequirements(descriptionCtrl.text, mergedSkills);
@@ -200,7 +212,7 @@ class PostJobController extends GetxController {
 
   List<String> _extractRequiredSkills(String text) {
     final words = text
-        .split(RegExp(r'[^a-zA-Z0-9#+./-]+'))
+        .split(RegExp(r'[^\p{L}\p{N}#+./-]+', unicode: true))
         .map((e) => e.trim())
         .where((e) => e.length >= 2 && e.length <= 40)
         .toList();
