@@ -5,8 +5,7 @@ class JobsBinding extends Bindings {
   @override
   void dependencies() {
     if (!Get.isRegistered<JobsController>()) {
-      Get.lazyPut<JobsController>(() => JobsController());
+      Get.lazyPut<JobsController>(() => JobsController(), fenix: true);
     }
   }
 }
-

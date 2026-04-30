@@ -20,7 +20,7 @@ class RootBinding extends Bindings {
     }
     // Root tabs rely on authenticated/session-aware controllers.
     AuthBinding().dependencies();
-    Get.lazyPut<RootController>(() => RootController());
+    Get.put<RootController>(RootController(), permanent: true);
     SeekerHomeBinding().dependencies();
     AiAnalyzerBinding().dependencies();
     JobsBinding().dependencies();

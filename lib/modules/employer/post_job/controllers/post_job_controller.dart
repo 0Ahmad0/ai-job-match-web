@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../../core/utils/matcher_util.dart';
 import '../../../../data/services/gemini_service.dart';
 
 class PostJobController extends GetxController {
@@ -90,7 +91,9 @@ class PostJobController extends GetxController {
     if (clean.isEmpty) {
       return;
     }
-    final exists = requiredSkills.any((s) => s.toLowerCase() == clean.toLowerCase());
+    final exists = requiredSkills.any(
+      (s) => s.toLowerCase() == clean.toLowerCase(),
+    );
     if (!exists) {
       requiredSkills.add(clean);
     }
@@ -113,7 +116,9 @@ class PostJobController extends GetxController {
       );
 
       if (draft == null) {
-        descriptionCtrl.text = 'msg_ai_job_desc_template'.trParams({'title': titleCtrl.text.trim()});
+        descriptionCtrl.text = 'msg_ai_job_desc_template'.trParams({
+          'title': titleCtrl.text.trim(),
+        });
         return;
       }
 
@@ -137,7 +142,9 @@ class PostJobController extends GetxController {
       aiRequirements.assignAll(draftRequirements);
       Get.snackbar('success_title'.tr, 'job_ai_generated_success'.tr);
     } catch (e) {
-      descriptionCtrl.text = 'msg_ai_job_desc_template'.trParams({'title': titleCtrl.text.trim()});
+      descriptionCtrl.text = 'msg_ai_job_desc_template'.trParams({
+        'title': titleCtrl.text.trim(),
+      });
       Get.snackbar('err_title'.tr, 'job_ai_generated_fallback'.tr);
     } finally {
       isAiWriting.value = false;
@@ -157,13 +164,19 @@ class PostJobController extends GetxController {
 
     isPublishing.value = true;
     try {
-      final companyDoc = await _firestore.collection('users').doc(user.uid).get();
-      final companyName = (companyDoc.data()?['companyName'] as String?) ??
+      final companyDoc = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      final companyName =
+          (companyDoc.data()?['companyName'] as String?) ??
           user.displayName ??
           user.email ??
           'unknown_company'.tr;
 
-      final extractedFromDescription = _extractRequiredSkills(descriptionCtrl.text);
+      final extractedFromDescription = _extractRequiredSkills(
+        descriptionCtrl.text,
+      );
       final extractedFromTitle = _extractRequiredSkills(titleCtrl.text);
       final mergedSkills = <String>{
         ...requiredSkills,
@@ -211,18 +224,7 @@ class PostJobController extends GetxController {
   }
 
   List<String> _extractRequiredSkills(String text) {
-    final words = text
-        .split(RegExp(r'[^\p{L}\p{N}#+./-]+', unicode: true))
-        .map((e) => e.trim())
-        .where((e) => e.length >= 2 && e.length <= 40)
-        .toList();
-    final unique = <String>{};
-    for (final word in words) {
-      if (RegExp(r'^\d+$').hasMatch(word)) continue;
-      unique.add(word);
-      if (unique.length >= 20) break;
-    }
-    return unique.toList();
+    return MatcherUtil.extractKnownSkillsFromText(text).take(20).toList();
   }
 
   List<String> _extractRequirements(String description, List<String> skills) {
@@ -231,7 +233,9 @@ class PostJobController extends GetxController {
         .map((e) => e.trim())
         .where((e) => e.isNotEmpty)
         .toList();
-    final bullets = lines.where((line) => line.startsWith('-') || line.startsWith('•')).toList();
+    final bullets = lines
+        .where((line) => line.startsWith('-') || line.startsWith('•'))
+        .toList();
     final normalized = bullets
         .map((line) => line.replaceFirst(RegExp(r'^[-•]\s*'), '').trim())
         .where((line) => line.isNotEmpty)
@@ -239,7 +243,10 @@ class PostJobController extends GetxController {
     if (normalized.isNotEmpty) {
       return normalized;
     }
-    return skills.take(8).map((s) => '${'job_requirement_with_skill'.trParams({'skill': s})}.').toList();
+    return skills
+        .take(8)
+        .map((s) => '${'job_requirement_with_skill'.trParams({'skill': s})}.')
+        .toList();
   }
 
   void _clearForm() {
