@@ -75,17 +75,17 @@ class PostJobView extends GetView<PostJobController> {
                       ),
                     ),
                   if (controller.currentStep.value > 0) 15.horizontalSpace,
-                    Expanded(
-                      child: controller.isPublishing.value
-                          ? const ShimmerSkeleton(height: 50, radius: 12)
-                          : CustomButton(
-                              text: controller.currentStep.value == 0
-                                  ? 'btn_next'.tr
-                                  : 'lbl_publish'.tr,
-                              onPressed: controller.nextStep,
-                            ),
-                    ),
-                  ],
+                  Expanded(
+                    child: controller.isPublishing.value
+                        ? const ShimmerSkeleton(height: 50, radius: 12)
+                        : CustomButton(
+                            text: controller.currentStep.value == 0
+                                ? 'btn_next'.tr
+                                : 'lbl_publish'.tr,
+                            onPressed: controller.nextStep,
+                          ),
+                  ),
+                ],
               ).animate().fade(duration: 280.ms).slideY(begin: 0.04, end: 0),
             ),
           ],
@@ -122,7 +122,17 @@ class PostJobView extends GetView<PostJobController> {
               children: controller.jobTypes.map((type) {
                 final isSelected = controller.selectedJobType.value == type;
                 return ChoiceChip(
-                  label: Text(type == 'Full Time' ? 'lbl_full_time'.tr : type == 'Part Time' ? 'lbl_part_time'.tr : type == 'Remote' ? 'lbl_remote'.tr : type == 'Contract' ? 'lbl_contract'.tr : type),
+                  label: Text(
+                    type == 'Full Time'
+                        ? 'lbl_full_time'.tr
+                        : type == 'Part Time'
+                        ? 'lbl_part_time'.tr
+                        : type == 'Remote'
+                        ? 'lbl_remote'.tr
+                        : type == 'Contract'
+                        ? 'lbl_contract'.tr
+                        : type,
+                  ),
                   selected: isSelected,
                   onSelected: (val) => controller.selectedJobType.value = type,
                   selectedColor: context.theme.primaryColor,
@@ -199,6 +209,10 @@ class PostJobView extends GetView<PostJobController> {
               10.horizontalSpace,
               ElevatedButton(
                 onPressed: controller.addSkillFromInput,
+                style: ElevatedButton.styleFrom(
+                  minimumSize: Size(52.w, 52.h),
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                ),
                 child: Text('btn_add'.tr),
               ),
             ],
@@ -240,28 +254,24 @@ class PostJobView extends GetView<PostJobController> {
       child: Column(
         children: [
           // AI Button
-          Obx(
-            () {
-              final isAiWriting = controller.isAiWriting.value;
-              return Align(
-                alignment: AlignmentDirectional.centerEnd,
-                child: TextButton.icon(
-                  onPressed:
-                      isAiWriting ? null : controller.autoWriteDescription,
-                  icon: isAiWriting
-                      ? SizedBox(
-                          width: 15.w,
-                          height: 15.w,
-                          child:
-                              const CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.auto_awesome),
-                  label: Text('lbl_ai_write'.tr),
-                  style: TextButton.styleFrom(foregroundColor: Colors.purple),
-                ),
-              );
-            },
-          ),
+          Obx(() {
+            final isAiWriting = controller.isAiWriting.value;
+            return Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: TextButton.icon(
+                onPressed: isAiWriting ? null : controller.autoWriteDescription,
+                icon: isAiWriting
+                    ? SizedBox(
+                        width: 15.w,
+                        height: 15.w,
+                        child: const CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.auto_awesome),
+                label: Text('lbl_ai_write'.tr),
+                style: TextButton.styleFrom(foregroundColor: Colors.purple),
+              ),
+            );
+          }),
 
           TextField(
             controller: controller.descriptionCtrl,
@@ -301,10 +311,12 @@ class PostJobView extends GetView<PostJobController> {
                         8.verticalSpace,
                         ...controller.aiRequirements
                             .take(6)
-                            .map((req) => Padding(
-                                  padding: EdgeInsets.only(bottom: 6.h),
-                                  child: Text('- $req'),
-                                )),
+                            .map(
+                              (req) => Padding(
+                                padding: EdgeInsets.only(bottom: 6.h),
+                                child: Text('- $req'),
+                              ),
+                            ),
                       ],
                     ),
                   ),
@@ -348,5 +360,3 @@ class PostJobView extends GetView<PostJobController> {
     );
   }
 }
-
-

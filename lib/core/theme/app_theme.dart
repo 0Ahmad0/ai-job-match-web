@@ -132,6 +132,7 @@ class AppTheme {
   ];
 
   static TextTheme _buildTextTheme(TextTheme base, Color color, Color muted) {
+    // Font All app Used
     return GoogleFonts.cairoTextTheme(base).copyWith(
       displayLarge: GoogleFonts.cairo(
         fontSize: 57.sp,
